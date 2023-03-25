@@ -1,0 +1,21 @@
+{
+    "name": "kenjiefx/strawberry-scratch",
+    "description": "StrawberryJS Extension for the Scratch PHP Site Generator",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Kenjiefx\\StrawberryScratch\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "kenjiefx",
+            "email": "terradoflex@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "kenjiefx/scratch-php": "dev-main"
+    }
+}
