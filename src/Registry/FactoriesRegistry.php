@@ -2,6 +2,8 @@
 
 namespace Kenjiefx\StrawberryScratch\Registry;
 use Kenjiefx\ScratchPHP\App\Themes\ThemeController;
+use Kenjiefx\StrawberryScratch\Services\DependencyImporter;
+use Kenjiefx\StrawberryScratch\Services\DependencyParser;
 
 class FactoriesRegistry
 {
@@ -10,24 +12,58 @@ class FactoriesRegistry
 
     public function __construct(
         private ThemeController $themeController,
-        private TokenRegistry $tokenRegistry
+        private TokenRegistry $tokenRegistry,
+        private AuxiliaryRegistry $auxiliaryRegistry,
+        private DependencyParser $dependencyParser
     ){
 
     }
 
     public function discoverFactories(){
-        $factoryScripts = '';
         if (count(static::$factories)===0) {
+
             $factoriesDirPath = $this->themeController->getThemePath().'/strawberry/factories';
             if (!is_dir($factoriesDirPath)) return;
+
             foreach (scandir($factoriesDirPath) as $fileName) {
                 if ($fileName==='.'||$fileName==='..') continue;
-                $filePath = $factoriesDirPath.'/'.$fileName;
+
+                $filePath    = $factoriesDirPath.'/'.$fileName;
                 $factoryName = explode('.',$fileName)[0];
-                $this->factories[$factoryName] = TokenRegistry::register($factoryName);
-                $factoryScripts .= file_get_contents($filePath);
+                static::$factories[$factoryName] = TokenRegistry::register($factoryName);
+
+                $scriptContent = file_get_contents($filePath);
+                $this->auxiliaryRegistry->addScript($factoryName,$scriptContent);
+
+                $dependencies = $this->dependencyParser->listDependencies($scriptContent,'factory');
+                $this->auxiliaryRegistry->addDependency(
+                    scriptName: $factoryName,
+                    dependecyList: $dependencies
+                );
+
             }
         }
-        return $factoryScripts;
+    }
+
+    public function getScriptsBasedOnUsage(
+        string $jsSource
+    ){
+        $importer = new DependencyImporter($this->auxiliaryRegistry);
+        foreach (static::$factories as $factoryName => $minifiedName) {
+            $isBeingUsed = false;
+            foreach($this->dependencyParser->getAllUsageOccurencesByFormat($factoryName) as $occurenceFormat) {
+                if (str_contains($jsSource,$occurenceFormat)) {
+                    $isBeingUsed = true;
+                }
+            }
+            if ($isBeingUsed) {
+                $importer->import($factoryName);
+            }
+        }
+        return $importer->getScript();
+    }
+
+    public function getFactories(){
+        return static::$factories;
     }
 }

@@ -2,7 +2,9 @@
 
 namespace Kenjiefx\StrawberryScratch\Services;
 use Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry;
+use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
+use Kenjiefx\StrawberryScratch\Registry\ServicesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\TokenRegistry;
 
 class ObfuscatorService
@@ -19,7 +21,10 @@ class ObfuscatorService
     public function __construct(
         private TokenRegistry $tokenRegistry,
         private ComponentsRegistry $componentsRegistry,
-        private GlobalFunctionsRegistry $globalFunctionsRegistry
+        private ServicesRegistry $servicesRegistry,
+        private FactoriesRegistry $factoriesRegistry,
+        private GlobalFunctionsRegistry $globalFunctionsRegistry,
+        private DependencyParser $dependencyParser
     ){
         $this->registerGlobalKeywords();
     }
@@ -52,6 +57,26 @@ class ObfuscatorService
         $components = $this->componentsRegistry->getComponents();
         foreach ($components as $componentName => $minifiedName) {
             $jsSource = str_replace("app.component('".$componentName,"app.component('".$minifiedName,$jsSource);
+        }
+
+        # Obfuscation of Factories 
+        $factories = $this->factoriesRegistry->getFactories();
+        foreach ($factories as $factory => $minifiedName) {
+            $jsSource = str_replace("app.factory('".$factory,"app.factory('".$minifiedName,$jsSource);
+            foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($factory) as $format) {
+                $replacedFormat = str_replace($factory,$minifiedName,$format);
+                $jsSource = str_replace($format,$replacedFormat,$jsSource);
+            }
+        }
+
+        # Obfuscation of Services 
+        $services = $this->servicesRegistry->getServices();
+        foreach ($services as $service => $minifiedName) {
+            $jsSource = str_replace("app.service('".$service,"app.service('".$minifiedName,$jsSource);
+            foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($service) as $format) {
+                $replacedFormat = str_replace($service,$minifiedName,$format);
+                $jsSource = str_replace($format,$replacedFormat,$jsSource);
+            }
         }
 
         # Obfuscation Global Functions 

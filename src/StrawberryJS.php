@@ -12,6 +12,7 @@ use Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry;
 class StrawberryJS implements ExtensionsInterface
 {
 
+    public const APP_VAR_NAME = 'app';
     private static $buildAppScript = false;
 
     public function __construct(
@@ -41,8 +42,13 @@ class StrawberryJS implements ExtensionsInterface
 
     public function mutatePageJS(string $pageJS):string {
         $globalsScript = $this->globalFunctionsRegistry->importGlobals($pageJS);
-        $factoriesScript = '';
-        $servicesScript = $this->servicesRegistry->discoverServices();
+
+        $this->factoriesRegistry->discoverFactories();
+        $this->servicesRegistry->discoverServices();
+        
+        $factoriesScript = $this->factoriesRegistry->getScriptsBasedOnUsage($pageJS);
+        $servicesScript = $this->servicesRegistry->getScriptsBasedOnUsage($pageJS);
+
         $obfuscatedJs =$globalsScript.$factoriesScript.$servicesScript.$pageJS;
 
         if (StrawberryConfig::obfuscate()) {
@@ -50,7 +56,7 @@ class StrawberryJS implements ExtensionsInterface
             $this->jSMinifier->setCodeBlock($obfuscatedJs);
             $obfuscatedJs = $this->jSMinifier->minify();
         }
-        echo $obfuscatedJs;
+
         return $obfuscatedJs;
     }
 
