@@ -67,7 +67,11 @@ class DependencyParser
             '+ '.$dependencyName.'.',
             ' '.$dependencyName.'.',
             '('.$dependencyName.')',
-            '( '.$dependencyName.' )'
+            '( '.$dependencyName.' )',
+            ', '.$dependencyName.')',
+            ','.$dependencyName.')',
+            '( '.$dependencyName.',',
+            '('.$dependencyName.','
         ];
     }
 
