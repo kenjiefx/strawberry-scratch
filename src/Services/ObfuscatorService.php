@@ -70,6 +70,7 @@ class ObfuscatorService
             foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($factory) as $format) {
                 $replacedFormat = str_replace($factory,$minifiedName,$format);
                 $jsSource = str_replace($format,$replacedFormat,$jsSource);
+
             }
         }
 
