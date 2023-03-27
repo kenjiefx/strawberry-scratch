@@ -57,6 +57,10 @@ class ObfuscatorService
         $components = $this->componentsRegistry->getComponents();
         foreach ($components as $componentName => $minifiedName) {
             $jsSource = str_replace("app.component('".$componentName,"app.component('".$minifiedName,$jsSource);
+            foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($componentName) as $format) {
+                $replacedFormat = str_replace($componentName,$minifiedName,$format);
+                $jsSource = str_replace($format,$replacedFormat,$jsSource);
+            }
         }
 
         # Obfuscation of Factories 
