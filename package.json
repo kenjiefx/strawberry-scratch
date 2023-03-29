@@ -1,0 +1,23 @@
+{
+  "name": "strawberry-scratch",
+  "version": "1.0.0",
+  "description": "StrawberryJS Extension for the Scratch PHP Site Generator",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kenjiefx/strawberry-scratch.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kenjiefx/strawberry-scratch/issues"
+  },
+  "homepage": "https://github.com/kenjiefx/strawberry-scratch#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
