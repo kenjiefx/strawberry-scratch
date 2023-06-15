@@ -1,7 +1,12 @@
 <?php
 
 namespace Kenjiefx\StrawberryScratch;
-use Kenjiefx\ScratchPHP\App\Components\ComponentModel;
+use Kenjiefx\ScratchPHP\App\Components\ComponentController;
+use Kenjiefx\ScratchPHP\App\Events\ListensTo;
+use Kenjiefx\ScratchPHP\App\Events\OnBuildHtmlEvent;
+use Kenjiefx\ScratchPHP\App\Events\OnBuildJsEvent;
+use Kenjiefx\ScratchPHP\App\Events\OnCreateComponentHtmlEvent;
+use Kenjiefx\ScratchPHP\App\Events\OnCreateComponentJsEvent;
 use Kenjiefx\ScratchPHP\App\Interfaces\ExtensionsInterface;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
@@ -27,6 +32,7 @@ class StrawberryJS implements ExtensionsInterface
 
     }
 
+    #[ListensTo(OnBuildHtmlEvent::class)]
     public function mutatePageHTML(string $pageHTML):string {
         $obfuscatedHtml = $pageHTML;
         if (StrawberryConfig::obfuscate()) {
@@ -36,10 +42,7 @@ class StrawberryJS implements ExtensionsInterface
         return $obfuscatedHtml;
     }
 
-    public function mutatePageCSS(string $pageCSS):string {
-        return $pageCSS;
-    }
-
+    #[ListensTo(OnBuildJsEvent::class)]
     public function mutatePageJS(string $pageJS):string {
         $globalsScript = $this->globalFunctionsRegistry->importGlobals($pageJS);
 
@@ -60,26 +63,20 @@ class StrawberryJS implements ExtensionsInterface
         return $obfuscatedJs;
     }
 
-    public function onCreateComponentContent(
-        ComponentModel $componentModel, 
-        string $content
-    ):string{
-        $template = file_get_contents(__dir__.'/templates/component.php');
-        return str_replace('COMPONENT_NAME',$componentModel->getComponentName(),$template);
+    #[ListensTo(OnCreateComponentHtmlEvent::class)]
+    public function onCreateComponentContent(ComponentController $ComponentController){
+        $html         = $ComponentController->getComponent()->getHtml();
+        $template     = file_get_contents(__dir__.'/templates/component.php');
+        $modifiedHtml = str_replace('COMPONENT_NAME',$ComponentController->getComponent()->getName(),$template);
+        $ComponentController->getComponent()->setHtml($html.$modifiedHtml);
+        return null;
     }
 
-    public function onCreateComponentCSS(
-        ComponentModel $componentModel, 
-        string $css
-    ): string {
-        return $css;
-    }
-
-    public function onCreateComponentJS(
-        ComponentModel $componentModel, 
-        string $js
-    ): string {
-        $template = file_get_contents(__dir__.'/templates/component.js');
-        return str_replace('COMPONENT_NAME',$componentModel->getComponentName(),$template);
+    #[ListensTo(OnCreateComponentJsEvent::class)]
+    public function onCreateComponentJS(ComponentController $ComponentController) {
+        $javascript    = $ComponentController->getComponent()->getJavascript();
+        $template      = file_get_contents(__dir__.'/templates/component.js');
+        $modJavascript = str_replace('COMPONENT_NAME',$ComponentController->getComponent()->getName(),$template);
+        $ComponentController->getComponent()->setJavascript($javascript.$modJavascript);
     }
 }

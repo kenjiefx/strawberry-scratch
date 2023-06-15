@@ -1,10 +1,11 @@
 {
-    "theme": "infinity",
+    "theme": "slate",
     "exportDir": "\/dist",
     "build": {
-        "useRandomAssetsFileNames": false
+        "useRandomAssetsFileNames": true
     },
     "extensions": {
-        "Kenjiefx\\StrawberryScratch\\StrawberryJS":{}
+        "Kenjiefx\\StrawberryScratch\\StrawberryJS":{},
+        "Kenjiefx\\VentaCSS\\VentaCSS":{}
     }
 }
