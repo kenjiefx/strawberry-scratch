@@ -22,7 +22,7 @@ class FactoriesRegistry
     public function discoverFactories(){
         if (count(static::$factories)===0) {
 
-            $factoriesDirPath = $this->themeController->getThemePath().'/strawberry/factories';
+            $factoriesDirPath = $this->themeController->getThemeDirPath().'/strawberry/factories';
             if (!is_dir($factoriesDirPath)) return;
 
             foreach (scandir($factoriesDirPath) as $fileName) {

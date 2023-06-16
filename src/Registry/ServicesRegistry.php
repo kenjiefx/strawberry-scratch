@@ -21,7 +21,7 @@ class ServicesRegistry
     public function discoverServices(){
         if (count(static::$services)===0) {
 
-            $servicesDirPath = $this->themeController->getThemePath().'/strawberry/services';
+            $servicesDirPath = $this->themeController->getThemeDirPath().'/strawberry/services';
             if (!is_dir($servicesDirPath)) return;
 
             foreach (scandir($servicesDirPath) as $fileName) {
