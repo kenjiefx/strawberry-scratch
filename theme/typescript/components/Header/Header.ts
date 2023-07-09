@@ -1,4 +1,5 @@
 import {ScopeObject, PatchHelper, app, BlockElements, BlockElement, StrawberryApp, StrawberryElement} from '../../strawberry/app'
+import { AuthSvc } from '../../strawberry/services/AuthSvc'
 interface ErrorBlock {
     name: '@ErrorMessageBlock',
     each:(element:StrawberryElement)=>void
@@ -9,32 +10,26 @@ interface SuccessBlock {
     each:()=>void
 }
 
-export interface HeaderComponent {
-    getNewItem:()=>{
-
-    }
+export interface IHeader {
+    getNewItem:()=>{},
+    findElement:()=>{},
+    checkMate:()=>null
 }
 
-app.component('Header',(
+
+app.component<IHeader>('Header',(
     $scope: ScopeObject,
     $patch: PatchHelper,
     $block: BlockElements<ErrorBlock|SuccessBlock>
 )=>{
-    $scope.say_hello = 'Hello World!';
-    $block({
-        name:'@ErrorMessageBlock',
-        each:(element)=>{
-            element.$element.dataset.helloWorld = '123'
-        }
-    })
-    $scope.events = {
-        click:(button:StrawberryElement)=>{
-            button.addClass('remove');
-        }
-    }
+    $scope.say_hello = 'This is header component';
     return {
         getNewItem:()=>{
             return {}
-        }
-    } satisfies HeaderComponent
+        },
+        findElement:()=>{
+            return {}
+        },
+        checkMate:()=>null
+    } 
 });

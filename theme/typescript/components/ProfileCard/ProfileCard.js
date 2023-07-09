@@ -1,6 +1,6 @@
 import { app } from "../../strawberry/app";
 app.component('ProfileCard', ($scope, $patch, Header) => {
-    $scope.say_hello = 'Hello World!';
-    Header.getNewItem();
+    $scope.say_hello = 'import World!';
+    Header.findElement();
     return {};
 });

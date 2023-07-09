@@ -11,6 +11,7 @@ use Kenjiefx\ScratchPHP\App\Interfaces\ExtensionsInterface;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
 use Kenjiefx\StrawberryScratch\Registry\ServicesRegistry;
+use Kenjiefx\StrawberryScratch\Services\ImportsStripper;
 use Kenjiefx\StrawberryScratch\Services\ObfuscatorService;
 use Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry;
 
@@ -24,6 +25,7 @@ class StrawberryJS implements ExtensionsInterface
         private ComponentsRegistry $componentsRegistry,
         private StrawberryConfig $strawberryConfig,
         private ObfuscatorService $obfuscatorService,
+        private ImportsStripper $importsStripper,
         private GlobalFunctionsRegistry $globalFunctionsRegistry,
         private FactoriesRegistry $factoriesRegistry,
         private ServicesRegistry $servicesRegistry,
@@ -52,7 +54,11 @@ class StrawberryJS implements ExtensionsInterface
         $factoriesScript = $this->factoriesRegistry->getScriptsBasedOnUsage($pageJS);
         $servicesScript = $this->servicesRegistry->getScriptsBasedOnUsage($pageJS);
 
-        $obfuscatedJs =$globalsScript.$factoriesScript.$servicesScript.$pageJS;
+        $obfuscatedJs = $globalsScript.$factoriesScript.$servicesScript.$pageJS;
+
+        if (StrawberryConfig::stripImports()){
+            $obfuscatedJs = $this->importsStripper->stripOff($obfuscatedJs);
+        }
 
         if (StrawberryConfig::obfuscate()) {
             $obfuscatedJs = $this->obfuscatorService->obfuscateJs($obfuscatedJs);

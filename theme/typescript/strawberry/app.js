@@ -1,5 +1,5 @@
 export const app = {
-    component: () => {
-        return null;
-    }
+    component: () => { },
+    service: () => { },
+    factory: () => { }
 };
