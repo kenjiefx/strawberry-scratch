@@ -16,7 +16,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "kenjiefx/scratch-php": "dev-main",
-        "kenjiefx/venta-css": "dev-main"
+        "kenjiefx/scratch-php": "dev-main"
     }
 }

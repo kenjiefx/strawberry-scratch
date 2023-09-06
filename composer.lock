@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "20a88332b3056bb976089f0cb892fd08",
+    "content-hash": "2c778ca4eebd582c7cf2e386f4b9ca9c",
     "packages": [
         {
             "name": "guzzlehttp/psr7",
@@ -132,12 +132,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kenjiefx/scratch-php.git",
-                "reference": "a0f641b5c9847951df2b1ee71eaf9307e004b903"
+                "reference": "c9b13d9868a222142d38e04c31bc7ea0d805834b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kenjiefx/scratch-php/zipball/a0f641b5c9847951df2b1ee71eaf9307e004b903",
-                "reference": "a0f641b5c9847951df2b1ee71eaf9307e004b903",
+                "url": "https://api.github.com/repos/kenjiefx/scratch-php/zipball/c9b13d9868a222142d38e04c31bc7ea0d805834b",
+                "reference": "c9b13d9868a222142d38e04c31bc7ea0d805834b",
                 "shasum": ""
             },
             "require": {
@@ -170,48 +170,7 @@
                 "issues": "https://github.com/kenjiefx/scratch-php/issues",
                 "source": "https://github.com/kenjiefx/scratch-php/tree/main"
             },
-            "time": "2023-06-15T20:28:08+00:00"
-        },
-        {
-            "name": "kenjiefx/venta-css",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/kenjiefx/venta-css.git",
-                "reference": "75d4cdec44240c86f9b606756481bc239b2576f7"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/kenjiefx/venta-css/zipball/75d4cdec44240c86f9b606756481bc239b2576f7",
-                "reference": "75d4cdec44240c86f9b606756481bc239b2576f7",
-                "shasum": ""
-            },
-            "require": {
-                "kenjiefx/scratch-php": "dev-main"
-            },
-            "default-branch": true,
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Kenjiefx\\VentaCSS\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "kenjiefx",
-                    "email": "terradoflex@gmail.com"
-                }
-            ],
-            "description": "Venta CSS extension for Scratch PHP",
-            "support": {
-                "issues": "https://github.com/kenjiefx/venta-css/issues",
-                "source": "https://github.com/kenjiefx/venta-css/tree/main"
-            },
-            "time": "2023-06-15T20:02:55+00:00"
+            "time": "2023-09-06T08:40:49+00:00"
         },
         {
             "name": "league/container",
@@ -1572,8 +1531,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "kenjiefx/scratch-php": 20,
-        "kenjiefx/venta-css": 20
+        "kenjiefx/scratch-php": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

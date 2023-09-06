@@ -1,5 +1,3 @@
-
-
 export interface StrawberryApp {
 
     /**
@@ -29,7 +27,9 @@ export interface StrawberryApp {
 
 type CallbackFunction<TDependecies extends unknown[],TObject> = (...args: TDependecies) => TObject;
 
-export type ScopeObject = {[key: string]: any}
+export type InjectableDependency = {[key:string]: any} | (()=>void)
+
+export type ScopeObject<TScope extends {[key: string]: any}> = TScope 
 export type PatchHelper = () => void;
 
 /** An element represented by xblock="@name" */

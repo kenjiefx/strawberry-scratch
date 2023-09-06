@@ -1,11 +1,13 @@
 {
-    "theme": "typescript",
+    "theme": "vogue",
     "exportDir": "\/dist",
     "build": {
         "useRandomAssetsFileNames": true
     },
+    "create":{
+        "useComponentTypeScript" : true
+    },
     "extensions": {
-        "Kenjiefx\\StrawberryScratch\\StrawberryJS":{},
-        "Kenjiefx\\VentaCSS\\VentaCSS":{}
+        "Kenjiefx\\StrawberryScratch\\StrawberryJS":{}
     }
 }
