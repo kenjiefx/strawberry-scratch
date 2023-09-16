@@ -1,16 +1,21 @@
 import { app } from "../app";
-app.factory('StateManagerFactory', (ErrorHandler) => {
+app.factory('StateManager', (ErrorHandler) => {
     class StateInstance {
         constructor() {
             this.state = '';
         }
     }
     class StateManager {
-        constructor({ reference, patchFn }) {
+        constructor() {
             this.states = {};
+        }
+        setScope(reference) {
             this.reference = reference;
-            if (undefined !== patchFn)
-                this.patchFn = patchFn;
+            return this;
+        }
+        setPatcher(patchFn) {
+            this.patchFn = patchFn;
+            return this;
         }
         register(name, callback = () => { }) {
             if (this.states.hasOwnProperty(name)) {
@@ -31,16 +36,5 @@ app.factory('StateManagerFactory', (ErrorHandler) => {
             return this.reference.state;
         }
     }
-    return {
-        createNewInstance: ({ name, scope, patch }) => {
-            if (!scope.hasOwnProperty('StateManager')) {
-                scope.StateManager = {};
-            }
-            scope.StateManager[name] = new StateInstance;
-            return new StateManager({
-                reference: scope.StateManager[name],
-                patchFn: patch
-            });
-        }
-    };
+    return StateManager;
 });

@@ -1,5 +1,6 @@
-<section xcomponent="@Header">
-    <div xif="StateManager.component.state=='loading'"></div>
-    <div xif="StateManager.component.state=='active'"></div>
-    <div xif="StateManager.component.state=='error'"></div>
-</section>
+<template xcomponent="@Header">
+    Hello World! {{hello}}
+    <div xif="state=='loading'"></div>
+    <div xif="state=='active'">This is active! <div xcomponent="@ProfileCard"></div></div>
+    <div xif="state=='error'"></div>
+</template>

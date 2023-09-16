@@ -1,13 +1,12 @@
 import { PatchHelper, ScopeObject, app } from "../../strawberry/app"
-import { StateManagerFactory } from "../../strawberry/factories/StateManagerFactory"
+import { StateManager } from "../../strawberry/factories/StateManager"
 
 /** States of the component */
 export type FooterState = 'loading' | 'active' | 'error'
-type ComponentStateType = {component:{state:FooterState}}
 
 /** Component Object */
 type ComponentScope = {
-    StateManager: ComponentStateType
+    state: FooterState
 }
 
 /** Exportables */
@@ -19,14 +18,9 @@ export interface Footer {
 app.component<Footer>('Footer',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManagerFactory: StateManagerFactory
+    StateManager: StateManager<FooterState>
 )=>{
-    const ComponentState = StateManagerFactory.createNewInstance<FooterState,ComponentScope>({
-        name: 'component',
-        patch: $patch,
-        scope: $scope
-    })
-    ComponentState.register('loading').register('active').register('error')
+    StateManager.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
     return {
         render:()=>{
             return new Promise((resolve,reject)=>{

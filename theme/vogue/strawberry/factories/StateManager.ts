@@ -14,7 +14,12 @@ type StatesMap = {
 /**
  * Manages the state of your component or sub-component.
  */
-interface StateManager<TStateNames extends string> {
+export interface StateManager<TStateNames extends string> {
+
+    setScope:(reference:StateInstance)=>this
+
+    setPatcher:(patchFn:PatchHelper)=>this
+
     /**
      * Registers a specific state
      * @param name - The name of the state
@@ -31,18 +36,7 @@ interface StateManager<TStateNames extends string> {
     getCurrentState:()=>string
 }
 
-/**
- * Creates the State Manager object
- */
-export interface StateManagerFactory {
-    createNewInstance:<TStateNames extends string,TScope extends {StateManager:{}}>({name,scope,patch}:{
-        name: string,
-        scope: ScopeObject<TScope>,
-        patch: PatchHelper
-    })=>StateManager<TStateNames>
-}
-
-app.factory<StateManagerFactory>('StateManagerFactory',(
+app.factory('StateManager',(
     ErrorHandler: ErrorHandler
 )=>{
     class StateInstance implements StateInstance {
@@ -52,9 +46,15 @@ app.factory<StateManagerFactory>('StateManagerFactory',(
         private states:StatesMap = {}
         private reference: StateInstance
         private patchFn: PatchHelper
-        constructor({reference,patchFn}:{reference:StateInstance,patchFn:PatchHelper}){
-            this.reference = reference;
-            if (undefined!==patchFn) this.patchFn = patchFn
+        constructor(){
+        }
+        setScope(reference:StateInstance){
+            this.reference = reference
+            return this
+        }
+        setPatcher(patchFn:PatchHelper){
+            this.patchFn = patchFn
+            return this
         }
         register(name:string,callback=()=>{}){
             if (this.states.hasOwnProperty(name)) {
@@ -63,7 +63,7 @@ app.factory<StateManagerFactory>('StateManagerFactory',(
             this.states[name] = callback
             return this
         }
-        switch(name){
+        switch(name:string){
             if (!this.states.hasOwnProperty(name)) {
                 throw new ErrorHandler.InvalidArgumentException()
             }
@@ -75,16 +75,5 @@ app.factory<StateManagerFactory>('StateManagerFactory',(
             return this.reference.state
         }
     }
-    return {
-        createNewInstance:({name,scope,patch})=>{
-            if (!scope.hasOwnProperty('StateManager')) {
-                scope.StateManager = {}
-            }
-            scope.StateManager[name] = new StateInstance
-            return new StateManager({
-                reference: scope.StateManager[name],
-                patchFn: patch
-            })
-        }
-    }
+    return StateManager
 })

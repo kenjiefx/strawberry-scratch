@@ -1,5 +1,5 @@
-<section xcomponent="@COMPONENT_NAME">
-    <div xif="StateManager.component.state=='loading'"></div>
-    <div xif="StateManager.component.state=='active'"></div>
-    <div xif="StateManager.component.state=='error'"></div>
-</section>
+<template xcomponent="@COMPONENT_NAME">
+    <div xif="state=='loading'"></div>
+    <div xif="state=='active'"></div>
+    <div xif="state=='error'"></div>
+</template>

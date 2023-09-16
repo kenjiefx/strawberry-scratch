@@ -22,15 +22,23 @@ export interface StrawberryApp {
      * @param name - The name of the factory
      * @param callback - The callback function that returns methods and properties implemented by `TFactory`
      */
-    factory:<TFactory>(name:string,callback:CallbackFunction<unknown[],TFactory>)=>void
+    factory:<TFactory>(name:string,callback:FactoryCallbackFunction<unknown[]>)=>void
 }
 
-type CallbackFunction<TDependecies extends unknown[],TObject> = (...args: TDependecies) => TObject;
+type CallbackFunction<TDependecies extends unknown[],TObject> = (...args: TDependecies) => TObject
+type FactoryCallbackFunction<TDependecies extends unknown[]> = (...args: TDependecies) => new (...args: any[]) => any
 
 export type InjectableDependency = {[key:string]: any} | (()=>void)
 
 export type ScopeObject<TScope extends {[key: string]: any}> = TScope 
-export type PatchHelper = () => void;
+export type PatchHelper = () => void
+export type AppInstance = {
+    /**
+     * Registers a function that executes when the App is ready
+     * @param callback - Function to call after the app is set to ready
+     */
+    onReady:(callback:()=>unknown)=>void
+}
 
 /** An element represented by xblock="@name" */
 export type BlockElement = {
