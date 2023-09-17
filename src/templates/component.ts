@@ -1,5 +1,5 @@
 import { PatchHelper, ScopeObject, app } from "../../strawberry/app"
-import { StateManager } from "../../strawberry/factories/StateManager"
+import { StateManagerInterface } from "../../strawberry/factories/StateManager"
 
 /** States of the component */
 export type COMPONENT_NAMEState = 'loading' | 'active' | 'error'
@@ -18,7 +18,7 @@ export interface COMPONENT_NAME {
 app.component<COMPONENT_NAME>('COMPONENT_NAME',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManager<COMPONENT_NAMEState>
+    StateManager: StateManagerInterface<COMPONENT_NAMEState>
 )=>{
     StateManager.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
     return {

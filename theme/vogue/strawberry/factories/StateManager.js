@@ -30,7 +30,7 @@ app.factory('StateManager', (ErrorHandler) => {
             }
             this.reference.state = name;
             this.states[name]();
-            this.patchFn();
+            return this.patchFn();
         }
         getCurrentState() {
             return this.reference.state;

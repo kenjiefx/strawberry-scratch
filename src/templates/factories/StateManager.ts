@@ -14,10 +14,10 @@ type StatesMap = {
 /**
  * Manages the state of your component or sub-component.
  */
-export interface StateManager<TStateNames extends string> {
+export interface StateManagerInterface<TStateNames extends string> {
 
     /**
-     * Registers the scope object
+     * Registers the scope object where the states are bind to
      * @param reference - The scope object
      * @returns 
      */
@@ -47,13 +47,14 @@ export interface StateManager<TStateNames extends string> {
     getCurrentState:()=>string
 }
 
-app.factory('StateManager',(
+type TStates = string
+app.factory<StateManagerInterface<TStates>>('StateManager',(
     ErrorHandler: ErrorHandler
 )=>{
     class StateInstance implements StateInstance {
         state = ''
     }
-    class StateManager implements StateManager {
+    class StateManager implements StateManagerInterface<TStates> {
         private states:StatesMap = {}
         private reference: StateInstance
         private patchFn: PatchHelper
@@ -80,7 +81,7 @@ app.factory('StateManager',(
             }
             this.reference.state = name
             this.states[name]()
-            this.patchFn()
+            return this.patchFn()
         }
         getCurrentState(){
             return this.reference.state

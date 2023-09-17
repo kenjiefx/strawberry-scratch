@@ -33,7 +33,7 @@ class ThemeInitializer
 
     public function setComponentStateManagerFactory(string $templatePath){
         $content = file_get_contents($templatePath);
-        file_put_contents($this->factoryDir.'/StateManagerFactory.ts',$content);
+        file_put_contents($this->factoryDir.'/StateManager.ts',$content);
         return $this;
     }
 

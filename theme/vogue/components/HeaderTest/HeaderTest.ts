@@ -1,30 +1,30 @@
 import { PatchHelper, ScopeObject, app } from "../../strawberry/app"
-import { StateManager } from "../../strawberry/factories/StateManager"
+import { StateManagerInterface } from "../../strawberry/factories/StateManager"
 
 /** States of the component */
-export type ProfileCardState = 'loading' | 'active' | 'error'
+export type HeaderTestState = 'loading' | 'active' | 'error'
 
 /** Component Object */
 type ComponentScope = {
-    state: ProfileCardState
+    state: HeaderTestState
 }
 
 /** Exportables */
-export interface ProfileCard {
+export interface HeaderTest {
     render:()=>Promise<void>
 }
 
 /** Component declarations */
-app.component<ProfileCard>('ProfileCard',(
+app.component<HeaderTest>('HeaderTest',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManager<ProfileCardState>
+    StateManager: StateManagerInterface<HeaderTestState>
 )=>{
     StateManager.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
     return {
         render:()=>{
             return new Promise((resolve,reject)=>{
-                StateManager.switch('active')
+
             })
         }
     }
