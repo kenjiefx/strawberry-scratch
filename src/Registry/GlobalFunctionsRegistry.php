@@ -25,7 +25,7 @@ class GlobalFunctionsRegistry
         $appName = TokenRegistry::register('StrawberryApp');
         static::$globals['StrawberryApp'] = $appName;
         static::$globals['const app = strawberry.create("app");'] = 'const '.$appName.'=strawberry.create("app"); ';
-        $globalScript = 'const app = strawberry.create("app"); ';
+        $globalScript = 'const app = strawberry.create("app"); '."\n";
         return $globalScript;
     }
 

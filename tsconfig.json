@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+      "skipLibCheck": true, /* Skip type checking all .d.ts files. */
+      "target": "es2017",
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata":true,
+      "outDir": "./theme",
+      "rootDir":"./theme"
+    },
+    "exclude": ["node_modules"],
+    "include": ["./theme/**/*.ts"]
+}
