@@ -2,12 +2,15 @@
     "theme": "vogue",
     "exportDir": "\/dist",
     "build": {
-        "useRandomAssetsFileNames": true
+        "useRandomAssetsFileNames": false
     },
     "create":{
         "useComponentTypeScript" : true
     },
     "extensions": {
-        "Kenjiefx\\StrawberryScratch\\StrawberryJS":{}
+        "Kenjiefx\\StrawberryScratch\\StrawberryJS":{
+            "obfuscate": true,
+            "stripImports" : true
+        }
     }
 }

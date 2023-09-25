@@ -5,8 +5,11 @@ use Kenjiefx\ScratchPHP\App\Components\ComponentController;
 use Kenjiefx\ScratchPHP\App\Events\ListensTo;
 use Kenjiefx\ScratchPHP\App\Events\OnBuildHtmlEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnBuildJsEvent;
+use Kenjiefx\ScratchPHP\App\Events\OnBuildCompleteEvent;
+use Kenjiefx\ScratchPHP\App\Events\OnSettingsRegistryEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateComponentHtmlEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateComponentJsEvent;
+use Kenjiefx\ScratchPHP\App\Events\OnCreateTemplateEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateThemeEvent;
 use Kenjiefx\ScratchPHP\App\Interfaces\ExtensionsInterface;
 use Kenjiefx\ScratchPHP\App\Themes\ThemeController;
@@ -46,6 +49,11 @@ class StrawberryJS implements ExtensionsInterface
             $obfuscatedHtml = $this->obfuscatorService->obfuscateHtml($obfuscatedHtml);
         }
         return $obfuscatedHtml;
+    }
+
+    #[ListensTo(OnSettingsRegistryEvent::class)]
+    public function registerSettings(array $settings){
+        $this->strawberryConfig::load($settings);
     }
 
     #[ListensTo(OnBuildJsEvent::class)]
@@ -96,6 +104,18 @@ class StrawberryJS implements ExtensionsInterface
         $this->themeInitializer->mountThemePath($themePath)
                                ->dumpAppTypeDefs(__dir__.'/templates/app.ts')
                                ->setComponentStateManagerFactory(__dir__.'/templates/factories/StateManager.ts')
-                               ->setErrorHandlerService(__dir__.'/templates/services/ErrorHandler.ts');
+                               ->setBuiltInServices(__dir__.'/templates/services')
+                               ->setThemeIndex(__dir__.'/templates/index.php')
+                               ->setBuiltInComponents(__dir__.'/templates')
+                               ->setBuiltInTemplates(__dir__.'/templates');
+    }
+
+    #[ListensTo(OnCreateTemplateEvent::class)]
+    public function onCreateTemplate(){
+        return file_get_contents(__dir__.'/templates/templates/template.index.php');
+    }
+    
+    #[ListensTo(OnBuildCompleteEvent::class)]
+    public function onBuildComplete(string $exportDir){
     }
 }

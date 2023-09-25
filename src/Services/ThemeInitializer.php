@@ -37,9 +37,40 @@ class ThemeInitializer
         return $this;
     }
 
-    public function setErrorHandlerService(string $templatePath){
+    public function setBuiltInServices(string $templatePath){
+        $services = ['ErrorHandler.ts','EventManager.ts','HttpRequestHelper.ts'];
+        foreach ($services as $service) {
+            $content = file_get_contents($templatePath.'/'.$service);
+            file_put_contents($this->servicesDir.'/'.$service,$content);
+        }
+        return $this;
+    }
+
+    public function setThemeIndex(string $templatePath){
         $content = file_get_contents($templatePath);
-        file_put_contents($this->servicesDir.'/ErrorHandler.ts',$content);
+        file_put_contents($this->themePath.'/index.php',$content);
+        return $this;
+    }
+
+    public function setBuiltInComponents(string $templatePath) {
+        $components = ['Router'];
+        foreach ($components as $component) {
+            mkdir($this->themePath.'/components/'.$component);
+            $fileTypes = ['.php','.ts','.css'];
+            foreach ($fileTypes as $fileType) {
+                $content = file_get_contents($templatePath.'/components/'.$component.'/'.$component.$fileType);
+                file_put_contents($this->themePath.'/components/'.$component.'/'.$component.$fileType,$content);
+            }
+        }
+        return $this;
+    }
+
+    public function setBuiltInTemplates(string $templatePath){
+        $templates = ['template.index.php'];
+        foreach ($templates as $template) {
+            $content = file_get_contents($templatePath.'/templates/'.$template);
+            file_put_contents($this->themePath.'/templates/'.$template,$content);
+        }
         return $this;
     }
 

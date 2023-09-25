@@ -8,6 +8,8 @@ class ComponentsRegistry
 
     private static array $components = [];
 
+    private static array $registry = [];
+
     public function __construct(
         private TokenRegistry $tokenRegistry
     ){
@@ -35,5 +37,16 @@ class ComponentsRegistry
 
     public function getComponents(){
         return static::$components;
+    }
+
+    public static function register(string $componentName){
+        array_push(static::$registry,$componentName);
+    }
+
+    public static function export(){
+        foreach (static::$registry as $componentName) {
+            component($componentName);
+        }
+        static::$registry = [];
     }
 }

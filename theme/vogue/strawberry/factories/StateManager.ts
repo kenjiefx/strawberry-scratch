@@ -5,7 +5,7 @@ interface StateInstance {
     state: string
 }
 
-type StateActivationCallback= null | (()=>void)
+type StateActivationCallback= ()=>void
 
 type StatesMap = {
     [key: string]: (()=>void)
@@ -42,7 +42,7 @@ export interface StateManagerInterface<TStateNames extends string> {
      * Switch to a specific state
      * @param name - The name of the state
      */
-    switch:(name:TStateNames)=>void
+    switch:(name:TStateNames)=>Promise<null>
 
     getCurrentState:()=>string
 }
