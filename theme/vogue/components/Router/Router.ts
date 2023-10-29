@@ -1,5 +1,5 @@
 import { AppInstance, PatchHelper, ScopeObject, app } from "../../strawberry/app"
-import { StateManagerInterface } from "../../strawberry/factories/StateManager"
+import { StateManagerFactory } from "../../strawberry/factories/StateManager"
 
 /** States of the component */
 export type RouterState = 'loading' | 'active' | 'error'
@@ -18,13 +18,16 @@ export interface Router {
 app.component<Router>('Router',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManagerInterface<RouterState>,
+    StateManager: StateManagerFactory<RouterState>,
     $app: AppInstance
 )=>{
-    StateManager.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
+    const ComponentState = new StateManager
+    ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
+
     $app.onReady(()=>{
-        StateManager.switch('active')
+        ComponentState.switch('active')
     })
+    
     return {
         render:()=>{
             return new Promise((resolve,reject)=>{
