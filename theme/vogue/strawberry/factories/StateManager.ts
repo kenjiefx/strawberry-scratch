@@ -34,7 +34,7 @@ interface StateManagerInterface<TStateNames extends string> {
     /**
      * Registers a specific state
      * @param name - The name of the state
-     * @param callback - (optional) Any callback function to run when this state is activated
+     * @param callback - (optional) Any callback function to execute when this state is activated
      */
     register:(name:TStateNames,callback?:StateActivationCallback)=>this
 
@@ -47,6 +47,9 @@ interface StateManagerInterface<TStateNames extends string> {
     getCurrentState:()=>string
 }
 
+/**
+ * Manages the state of your component or sub-component.
+ */
 export type StateManagerFactory<TStates extends string> = new (...args: any[]) => StateManagerInterface<TStates>
 
 type TStates = string

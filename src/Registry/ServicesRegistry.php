@@ -18,16 +18,13 @@ class ServicesRegistry
 
     }
 
-    public function discoverServices(){
-        if (count(static::$services)===0) {
-
-            $servicesDirPath = $this->themeController->getThemeDirPath().'/strawberry/services';
-            if (!is_dir($servicesDirPath)) return;
-
-            foreach (scandir($servicesDirPath) as $fileName) {
-                if ($fileName==='.'||$fileName==='..') continue;
-
-                $filePath = $servicesDirPath.'/'.$fileName;
+    private function deepDiscovery(string $directory){
+        foreach (scandir($directory) as $fileName) {
+            if ($fileName==='.'||$fileName==='..') continue;
+            $filePath = $directory.'/'.$fileName;
+            if (is_dir($filePath)) {
+                $this->deepDiscovery($filePath);
+            } else {
                 $serviceName = explode('.',$fileName)[0];
                 static::$services[$serviceName] = TokenRegistry::register($serviceName);
 
@@ -40,6 +37,16 @@ class ServicesRegistry
                     dependecyList: $dependencies
                 );
             }
+        }
+    }
+
+    public function discoverServices(){
+        if (count(static::$services)===0) {
+
+            $servicesDirPath = $this->themeController->getThemeDirPath().'/strawberry/services';
+            if (!is_dir($servicesDirPath)) return;
+
+            $this->deepDiscovery($servicesDirPath);
         }
     }
 

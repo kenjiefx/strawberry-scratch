@@ -103,8 +103,9 @@ class StrawberryJS implements ExtensionsInterface
         $themePath = $ThemeController->getThemeDirPath();
         $this->themeInitializer->mountThemePath($themePath)
                                ->dumpAppTypeDefs(__dir__.'/templates/app.ts')
-                               ->setComponentStateManagerFactory(__dir__.'/templates/factories/StateManager.ts')
+                               ->setBuiltInFactories(__dir__.'/templates/factories')
                                ->setBuiltInServices(__dir__.'/templates/services')
+                               ->setBuiltInInterfaces(__dir__.'/templates/interfaces')
                                ->setThemeIndex(__dir__.'/templates/index.php')
                                ->setBuiltInComponents(__dir__.'/templates')
                                ->setBuiltInTemplates(__dir__.'/templates');

@@ -19,9 +19,11 @@ class ThemeInitializer
         $this->strawberryDir = $path.'/strawberry';
         $this->servicesDir   = $path.'/strawberry/services';
         $this->factoryDir    = $path.'/strawberry/factories';
+        $this->interfacesDir = $path.'/strawberry/interfaces';
         mkdir($this->strawberryDir);
         mkdir($this->servicesDir);
         mkdir($this->factoryDir);
+        mkdir($this->interfacesDir);
         return $this;
     }
 
@@ -31,9 +33,12 @@ class ThemeInitializer
         return $this;
     }
 
-    public function setComponentStateManagerFactory(string $templatePath){
-        $content = file_get_contents($templatePath);
-        file_put_contents($this->factoryDir.'/StateManager.ts',$content);
+    public function setBuiltInFactories (string $templatePath){
+        $factories = ['StateManager.ts','AppConfig.ts','AppEnvironment.ts'];
+        foreach ($factories as $factory) {
+            $content = file_get_contents($templatePath.'/'.$factory);
+            file_put_contents($this->factoryDir.'/'.$factory,$content);
+        }
         return $this;
     }
 
@@ -42,6 +47,15 @@ class ThemeInitializer
         foreach ($services as $service) {
             $content = file_get_contents($templatePath.'/'.$service);
             file_put_contents($this->servicesDir.'/'.$service,$content);
+        }
+        return $this;
+    }
+
+    public function setBuiltInInterfaces(string $templateDir){
+        foreach (scandir($templateDir) as $templateName) {
+            if ($templateName==='.'||$templateName==='..') continue;
+            $content = file_get_contents($templateDir.'/'.$templateName);
+            file_put_contents($this->interfacesDir.'/'.$templateName,$content);
         }
         return $this;
     }

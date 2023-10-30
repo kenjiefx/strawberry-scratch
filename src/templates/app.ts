@@ -28,10 +28,32 @@ export interface StrawberryApp {
 type CallbackFunction<TDependecies extends unknown[],TObject> = (...args: TDependecies) => TObject
 type FactoryCallbackFunction<TDependecies extends unknown[]> = (...args: TDependecies) => new (...args: any[]) => any
 
-export type ParentComponent<TComponent> = {
+/**
+ * The `ParentComponentHelper` needs to be used with `$parent`.
+ * You must specify the interface or type of your Parent component 
+ * by passing it to the generic `TComponent`
+ */
+export type ParentComponentHelper <TComponent> = {
     get:()=>TComponent
 }
 
+/**
+ * The `ChildComponnetsHelper` needs to be used with `$children`. 
+* To use this type, you will need to specify a map of all child components:
+ * ```
+ * type TChildren = {
+ *      ChildComponentName: ChildComponentInterface
+ * }
+ * ```
+ * Depending on the logic you were building your component (build phase) on, 
+ * you may or you may not have certain components included as child components. This is
+ * a great use-case when, there are certain pages where this component will not be using
+ * a certain child component. As strawberry.js will throw an error when you inject child components
+ * that are not present within the parent component, $children services will be a great help. 
+ */
+export type ChildComponentsHelper <TChildren,T extends keyof TChildren> = {
+    get: <K extends T>(tChild: K) => TChildren[K] | null
+}
 export type InjectableDependency = {[key:string]: any} | (()=>void)
 
 export type ScopeObject<TScope extends {[key: string]: any}> = TScope 
@@ -59,8 +81,6 @@ export type BlockElement=<TElement>(
     elementName: string,
     callbackFunction:(element:StrawberryElement<TElement>)=>unknown
 )=>void
-
-
 
 export const app:StrawberryApp = {
     component:()=>{},

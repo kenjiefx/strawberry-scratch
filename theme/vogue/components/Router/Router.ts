@@ -19,8 +19,8 @@ export interface Router {
      */
     subscribeEvent:()=>{
         /**
-         * `PageActivationEvent` is dispatched when the Router updates the 
-         * component state to `active`
+         * Allows you to listen to the `PageActivationEvent`, which is dispatched 
+         * when the Router updates the component state to `active`
          * @param listener is called when the Event is dispatched
          */
         pageActive:(listener:()=>Promise<boolean>)=>void
