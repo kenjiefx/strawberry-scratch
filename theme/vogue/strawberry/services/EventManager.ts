@@ -7,7 +7,7 @@ export interface EventManagerInterface {
 }
 
 app.service<EventManagerInterface>('EventManager',()=>{
-    class EventManager implements EventManagerInterface {
+    class Manager implements EventManagerInterface {
         private events: {[key:string]:Event}
         constructor(){
             this.events = {}
@@ -49,7 +49,5 @@ app.service<EventManagerInterface>('EventManager',()=>{
             return this.listeners
         }
     }
-    const eventManager = new EventManager
-
-    return eventManager
+    return new Manager
 })

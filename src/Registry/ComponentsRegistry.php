@@ -40,12 +40,24 @@ class ComponentsRegistry
     }
 
     public static function register(string $componentName){
-        array_push(static::$registry,$componentName);
+        if (!in_array($componentName,static::$registry)) {
+            array_push(static::$registry,$componentName);
+        }
     }
 
     public static function export(){
-        foreach (static::$registry as $componentName) {
-            component($componentName);
+        $completed = false;
+        $exportedComponents = [];
+        while (!$completed) {
+            foreach (static::$registry as $componentName) {
+                if (!in_array($componentName,$exportedComponents)) {
+                    array_push($exportedComponents,$componentName);
+                    component($componentName);
+                }
+            }
+            $registryCount = count(static::$registry);
+            $exportedCount = count($exportedComponents);
+            $completed = ($registryCount===$exportedCount);
         }
         static::$registry = [];
     }

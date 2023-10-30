@@ -73,7 +73,8 @@ class DependencyParser
             '( '.$dependencyName.',',
             '('.$dependencyName.',',
             '!'.$dependencyName.'.',
-            $dependencyName.'.'
+            $dependencyName.'.',
+            'new '.$dependencyName
         ];
     }
 

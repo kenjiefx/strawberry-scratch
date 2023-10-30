@@ -14,7 +14,7 @@ type StatesMap = {
 /**
  * Manages the state of your component or sub-component.
  */
-export interface StateManagerInterface<TStateNames extends string> {
+interface StateManagerInterface<TStateNames extends string> {
 
     /**
      * Registers the scope object where the states are bind to
@@ -46,6 +46,8 @@ export interface StateManagerInterface<TStateNames extends string> {
 
     getCurrentState:()=>string
 }
+
+export type StateManagerFactory<TStates extends string> = new (...args: any[]) => StateManagerInterface<TStates>
 
 type TStates = string
 app.factory<StateManagerInterface<TStates>>('StateManager',(
