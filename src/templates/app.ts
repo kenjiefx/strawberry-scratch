@@ -22,16 +22,42 @@ export interface StrawberryApp {
      * @param name - The name of the factory
      * @param callback - The callback function that returns methods and properties implemented by `TFactory`
      */
-    factory:<TFactory>(name:string,callback:FactoryCallbackFunction<unknown[]>)=>void
+    factory:<TFactory>(name:string,callback:FactoryCallbackFunction<any[]>)=>void
 }
 
 type CallbackFunction<TDependecies extends unknown[],TObject> = (...args: TDependecies) => TObject
 type FactoryCallbackFunction<TDependecies extends unknown[]> = (...args: TDependecies) => new (...args: any[]) => any
 
+/**
+ * The `ParentComponentHelper` needs to be used with `$parent`.
+ * You must specify the interface or type of your Parent component 
+ * by passing it to the generic `TComponent`
+ */
+export type ParentComponentHelper <TComponent> = {
+    get:()=>TComponent
+}
+
+/**
+ * The `ChildComponnetsHelper` needs to be used with `$children`. 
+* To use this type, you will need to specify a map of all child components:
+ * ```
+ * type TChildren = {
+ *      ChildComponentName: ChildComponentInterface
+ * }
+ * ```
+ * Depending on the logic you were building your component (build phase) on, 
+ * you may or you may not have certain components included as child components. This is
+ * a great use-case when, there are certain pages where this component will not be using
+ * a certain child component. As strawberry.js will throw an error when you inject child components
+ * that are not present within the parent component, $children services will be a great help. 
+ */
+export type ChildComponentsHelper <TChildren,T extends keyof TChildren> = {
+    get: <K extends T>(tChild: K) => TChildren[K] | null
+}
 export type InjectableDependency = {[key:string]: any} | (()=>void)
 
 export type ScopeObject<TScope extends {[key: string]: any}> = TScope 
-export type PatchHelper = () => void
+export type PatchHelper = (elementName?:string) => Promise<null>
 export type AppInstance = {
     /**
      * Registers a function that executes when the App is ready
@@ -41,25 +67,20 @@ export type AppInstance = {
 }
 
 /** An element represented by xblock="@name" */
-export type BlockElement = {
-    name: string,
-    each:(element:StrawberryElement)=>void
-}
+
 
 /** An HTML element wrapped inside Strawberry-defined object */
-export type StrawberryElement = {
-    constructor:(element:HTMLElement,treeCount:null)=>void
-    get:()=>HTMLElement
+export type StrawberryElement<TElement> = {
+    constructor:(element:TElement,treeCount:null)=>void
     addClass:(className:string)=>void
     removeClass:(className:string)=>void
-    $element: HTMLElement
+    $element: TElement
 }
 
-/** 
- * A wrapper to a DOM query function that selects only element with xblock attribute,
- * and name defined by the name of the TBlockElement passed into this function
- */
-export type BlockElements<TBlockElement extends BlockElement> = (blockElement:TBlockElement) => void;
+export type BlockElement=<TElement>(
+    elementName: string,
+    callbackFunction:(element:StrawberryElement<TElement>)=>unknown
+)=>void
 
 export const app:StrawberryApp = {
     component:()=>{},

@@ -5,7 +5,7 @@ interface StateInstance {
     state: string
 }
 
-type StateActivationCallback= null | (()=>void)
+type StateActivationCallback= ()=>void
 
 type StatesMap = {
     [key: string]: (()=>void)
@@ -14,7 +14,7 @@ type StatesMap = {
 /**
  * Manages the state of your component or sub-component.
  */
-export interface StateManagerInterface<TStateNames extends string> {
+interface StateManagerInterface<TStateNames extends string> {
 
     /**
      * Registers the scope object where the states are bind to
@@ -34,7 +34,7 @@ export interface StateManagerInterface<TStateNames extends string> {
     /**
      * Registers a specific state
      * @param name - The name of the state
-     * @param callback - (optional) Any callback function to run when this state is activated
+     * @param callback - (optional) Any callback function to execute when this state is activated
      */
     register:(name:TStateNames,callback?:StateActivationCallback)=>this
 
@@ -42,10 +42,15 @@ export interface StateManagerInterface<TStateNames extends string> {
      * Switch to a specific state
      * @param name - The name of the state
      */
-    switch:(name:TStateNames)=>void
+    switch:(name:TStateNames)=>Promise<null>
 
     getCurrentState:()=>string
 }
+
+/**
+ * Manages the state of your component or sub-component.
+ */
+export type StateManagerFactory<TStates extends string> = new (...args: any[]) => StateManagerInterface<TStates>
 
 type TStates = string
 app.factory<StateManagerInterface<TStates>>('StateManager',(

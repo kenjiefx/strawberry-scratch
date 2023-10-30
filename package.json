@@ -19,5 +19,8 @@
   "homepage": "https://github.com/kenjiefx/strawberry-scratch#readme",
   "dependencies": {
     "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "@types/jquery": "^3.5.25"
   }
 }

@@ -19,16 +19,13 @@ class FactoriesRegistry
 
     }
 
-    public function discoverFactories(){
-        if (count(static::$factories)===0) {
-
-            $factoriesDirPath = $this->themeController->getThemeDirPath().'/strawberry/factories';
-            if (!is_dir($factoriesDirPath)) return;
-
-            foreach (scandir($factoriesDirPath) as $fileName) {
-                if ($fileName==='.'||$fileName==='..') continue;
-
-                $filePath    = $factoriesDirPath.'/'.$fileName;
+    private function deepDiscovery(string $directory){
+        foreach (scandir($directory) as $fileName) {
+            if ($fileName==='.'||$fileName==='..') continue;
+            $filePath = $directory.'/'.$fileName;
+            if (is_dir($filePath)) {
+                $this->deepDiscovery($filePath);
+            } else {
                 $factoryName = explode('.',$fileName)[0];
                 static::$factories[$factoryName] = TokenRegistry::register($factoryName);
 
@@ -40,8 +37,17 @@ class FactoriesRegistry
                     scriptName: $factoryName,
                     dependecyList: $dependencies
                 );
-
             }
+        }
+    }
+
+    public function discoverFactories(){
+        if (count(static::$factories)===0) {
+
+            $factoriesDirPath = $this->themeController->getThemeDirPath().'/strawberry/factories';
+            if (!is_dir($factoriesDirPath)) return;
+
+            $this->deepDiscovery($factoriesDirPath);
         }
     }
 
