@@ -85,19 +85,19 @@ class ObfuscatorService
         }
 
         # Obfuscation Global Functions 
-        $globalSubs = $this->globalFunctionsRegistry->getGlobals();
-        $obfuscatedGlobScr = $globalSubs['const app = strawberry.create("app");'];
-        $obfuscatedGlobScr .= 'const '.$globalSubs['app.factory'].'='.$globalSubs['StrawberryApp'].'.factory,';
-        $obfuscatedGlobScr .= $globalSubs['app.service'].'='.$globalSubs['StrawberryApp'].'.service,';
-        $obfuscatedGlobScr .= $globalSubs['app.component'].'='.$globalSubs['StrawberryApp'].'.component;';
-        $jsSource = str_replace(
-            'const app = strawberry.create("app");',
-            $obfuscatedGlobScr,
-            $jsSource
-        );
-        foreach ($globalSubs as $globalFunc => $globalSub) {
-            $jsSource = str_replace($globalFunc,$globalSub,$jsSource);
-        }
+        // $globalSubs = $this->globalFunctionsRegistry->getGlobals();
+        // $obfuscatedGlobScr = $globalSubs['const app = strawberry.create("app");'];
+        // $obfuscatedGlobScr .= 'const '.$globalSubs['app.factory'].'='.$globalSubs['StrawberryApp'].'.factory,';
+        // $obfuscatedGlobScr .= $globalSubs['app.service'].'='.$globalSubs['StrawberryApp'].'.service,';
+        // $obfuscatedGlobScr .= $globalSubs['app.component'].'='.$globalSubs['StrawberryApp'].'.component;';
+        // $jsSource = str_replace(
+        //     'const app = strawberry.create("app");',
+        //     $obfuscatedGlobScr,
+        //     $jsSource
+        // );
+        // foreach ($globalSubs as $globalFunc => $globalSub) {
+        //     $jsSource = str_replace($globalFunc,$globalSub,$jsSource);
+        // }
         return $jsSource;
     }
 }
