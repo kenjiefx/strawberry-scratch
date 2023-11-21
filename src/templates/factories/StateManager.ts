@@ -50,7 +50,7 @@ interface StateManagerInterface<TStateNames extends string> {
 /**
  * Manages the state of your component or sub-component.
  */
-export type StateManagerFactory<TStates extends string> = new (...args: any[]) => StateManagerInterface<TStates>
+export type StateManagerFactory = new <TStates extends string>(...args: any[]) => StateManagerInterface<TStates>
 
 type TStates = string
 app.factory<StateManagerInterface<TStates>>('StateManager',(

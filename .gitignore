@@ -4,3 +4,5 @@
 /theme/vogue/components/
 !/theme/vogue/components/Router
 /theme/**/*.js
+/src/NodeMinifier/min.js
+/src/NodeMinifier/src.js

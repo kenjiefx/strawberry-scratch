@@ -70,7 +70,6 @@ class ObfuscatorService
             foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($factory) as $format) {
                 $replacedFormat = str_replace($factory,$minifiedName,$format);
                 $jsSource = str_replace($format,$replacedFormat,$jsSource);
-
             }
         }
 
@@ -84,20 +83,27 @@ class ObfuscatorService
             }
         }
 
+        return $jsSource;
+    }
+
+    public function obfuscateStrawberryMethods(
+        string $jsSource
+    ){
         # Obfuscation Global Functions 
-        // $globalSubs = $this->globalFunctionsRegistry->getGlobals();
-        // $obfuscatedGlobScr = $globalSubs['const app = strawberry.create("app");'];
-        // $obfuscatedGlobScr .= 'const '.$globalSubs['app.factory'].'='.$globalSubs['StrawberryApp'].'.factory,';
-        // $obfuscatedGlobScr .= $globalSubs['app.service'].'='.$globalSubs['StrawberryApp'].'.service,';
-        // $obfuscatedGlobScr .= $globalSubs['app.component'].'='.$globalSubs['StrawberryApp'].'.component;';
-        // $jsSource = str_replace(
-        //     'const app = strawberry.create("app");',
-        //     $obfuscatedGlobScr,
-        //     $jsSource
-        // );
-        // foreach ($globalSubs as $globalFunc => $globalSub) {
-        //     $jsSource = str_replace($globalFunc,$globalSub,$jsSource);
-        // }
+        $globalSubs = $this->globalFunctionsRegistry->getGlobals();
+        $obfuscatedGlobScr = $globalSubs['const app = strawberry.create("app");'];
+        $obfuscatedGlobScr .= 'const '.$globalSubs['app.factory'].'='.$globalSubs['StrawberryApp'].'.factory,';
+        $obfuscatedGlobScr .= $globalSubs['app.service'].'='.$globalSubs['StrawberryApp'].'.service,';
+        $obfuscatedGlobScr .= $globalSubs['app.component'].'='.$globalSubs['StrawberryApp'].'.component;';
+        $jsSource = str_replace(
+            'const app = strawberry.create("app");',
+            $obfuscatedGlobScr,
+            $jsSource
+        );
+        foreach ($globalSubs as $globalFunc => $globalSub) {
+            $jsSource = str_replace($globalFunc,$globalSub,$jsSource);
+        }
+
         return $jsSource;
     }
 }

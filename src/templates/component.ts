@@ -38,10 +38,10 @@ type ComponentChildren = {}
 app.component<COMPONENT_NAME>('COMPONENT_NAME',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManagerFactory<COMPONENT_NAMEState>,
+    StateManager: StateManagerFactory,
     $children: ChildComponentsHelper<ComponentChildren,keyof ComponentChildren>
 )=>{
-    const ComponentState = new StateManager
+    const ComponentState = new StateManager<COMPONENT_NAMEState>
     ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
 
     return {
