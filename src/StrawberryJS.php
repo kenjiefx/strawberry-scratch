@@ -13,6 +13,7 @@ use Kenjiefx\ScratchPHP\App\Events\OnCreateTemplateEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateThemeEvent;
 use Kenjiefx\ScratchPHP\App\Interfaces\ExtensionsInterface;
 use Kenjiefx\ScratchPHP\App\Themes\ThemeController;
+use Kenjiefx\StrawberryScratch\NodeMinifier\NodeMinifier;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
 use Kenjiefx\StrawberryScratch\Registry\ServicesRegistry;
@@ -35,7 +36,7 @@ class StrawberryJS implements ExtensionsInterface
         private GlobalFunctionsRegistry $globalFunctionsRegistry,
         private FactoriesRegistry $factoriesRegistry,
         private ServicesRegistry $servicesRegistry,
-        private JSMinifier $jSMinifier,
+        private NodeMinifier $jSMinifier,
         private ThemeInitializer $themeInitializer
     ){
 
@@ -58,6 +59,7 @@ class StrawberryJS implements ExtensionsInterface
 
     #[ListensTo(OnBuildJsEvent::class)]
     public function mutatePageJS(string $pageJS):string {
+
         $globalsScript = $this->globalFunctionsRegistry->importGlobals($pageJS);
 
         $this->factoriesRegistry->discoverFactories();
@@ -76,6 +78,7 @@ class StrawberryJS implements ExtensionsInterface
             $obfuscatedJs = $this->obfuscatorService->obfuscateJs($obfuscatedJs);
             $this->jSMinifier->setCodeBlock($obfuscatedJs);
             $obfuscatedJs = $this->jSMinifier->minify();
+            $obfuscatedJs = $this->obfuscatorService->obfuscateStrawberryMethods($obfuscatedJs);
         }
 
         return $obfuscatedJs;

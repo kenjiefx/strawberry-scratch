@@ -70,7 +70,6 @@ class ObfuscatorService
             foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($factory) as $format) {
                 $replacedFormat = str_replace($factory,$minifiedName,$format);
                 $jsSource = str_replace($format,$replacedFormat,$jsSource);
-
             }
         }
 
@@ -84,6 +83,12 @@ class ObfuscatorService
             }
         }
 
+        return $jsSource;
+    }
+
+    public function obfuscateStrawberryMethods(
+        string $jsSource
+    ){
         # Obfuscation Global Functions 
         $globalSubs = $this->globalFunctionsRegistry->getGlobals();
         $obfuscatedGlobScr = $globalSubs['const app = strawberry.create("app");'];
@@ -98,6 +103,7 @@ class ObfuscatorService
         foreach ($globalSubs as $globalFunc => $globalSub) {
             $jsSource = str_replace($globalFunc,$globalSub,$jsSource);
         }
+
         return $jsSource;
     }
 }

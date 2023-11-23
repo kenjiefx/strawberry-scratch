@@ -31,11 +31,11 @@ export interface Router {
 app.component<Router>('Router',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManagerFactory<RouterState>,
+    StateManager: StateManagerFactory,
     $app: AppInstance,
     EventManager: EventManagerInterface
 )=>{
-    const ComponentState = new StateManager()
+    const ComponentState = new StateManager<RouterState>
     ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
     EventManager.register('PageActivationEvent')
     EventManager.subscribe('PageErrorEvent',()=>{
