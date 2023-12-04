@@ -1,6 +1,7 @@
-import { AppInstance, PatchHelper, ScopeObject, app } from "../../strawberry/app"
-import { StateManagerFactory } from "../../strawberry/factories/StateManager"
-import { EventManagerInterface } from "../../strawberry/services/EventManager"
+import { app, ScopeObject, PatchHelper, AppInstance } from "../strawberry/app"
+import { StateManagerFactory } from "../strawberry/factories/StateManager"
+import { EventManagerInterface } from "../strawberry/services/EventManager"
+
 
 /** States of the component */
 type RouterState = 'loading' | 'active' | 'error'
@@ -11,7 +12,7 @@ type ComponentScope = {
 }
 
 /** Exportables */
-export interface Router {
+export interface AppRouter {
     /**
      * Serves as a way for direct child components of the Router to listen 
      * to the different events, such as, when the Router updated the state 
@@ -19,8 +20,8 @@ export interface Router {
      */
     subscribeEvent:()=>{
         /**
-         * `PageActivationEvent` is dispatched when the Router updates the 
-         * component state to `active`
+         * Allows you to listen to the `PageActivationEvent`, which is dispatched 
+         * when the Router updates the component state to `active`
          * @param listener is called when the Event is dispatched
          */
         pageActive:(listener:()=>Promise<boolean>)=>void
@@ -28,14 +29,14 @@ export interface Router {
 }
 
 /** Component declarations */
-app.component<Router>('Router',(
+app.component<AppRouter>('AppRouter',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManagerFactory<RouterState>,
+    StateManager: StateManagerFactory,
     $app: AppInstance,
     EventManager: EventManagerInterface
 )=>{
-    const ComponentState = new StateManager()
+    const ComponentState = new StateManager<RouterState>
     ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
     EventManager.register('PageActivationEvent')
     EventManager.subscribe('PageErrorEvent',()=>{

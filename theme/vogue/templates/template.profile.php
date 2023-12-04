@@ -1,9 +1,13 @@
-<template xcomponent="@Router">
+<?php 
+// This template becomes part of the Router component
+# Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry::register('ExampleComponent');
+?>
+
+<template xcomponent="@AppRouter">
     <div xif="state=='loading'">
         <!-- Apply your Loading animation here -->
     </div>
     <div xif="state=='active'">
-        <?php template_content(); ?>
     </div>
     <div xif="state=='error'">
         <!-- Apply your Error Page here -->

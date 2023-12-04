@@ -66,21 +66,8 @@ class ThemeInitializer
         return $this;
     }
 
-    public function setBuiltInComponents(string $templatePath) {
-        $components = ['Router'];
-        foreach ($components as $component) {
-            mkdir($this->themePath.'/components/'.$component);
-            $fileTypes = ['.php','.ts','.css'];
-            foreach ($fileTypes as $fileType) {
-                $content = file_get_contents($templatePath.'/components/'.$component.'/'.$component.$fileType);
-                file_put_contents($this->themePath.'/components/'.$component.'/'.$component.$fileType,$content);
-            }
-        }
-        return $this;
-    }
-
     public function setBuiltInTemplates(string $templatePath){
-        $templates = ['template.index.php'];
+        $templates = ['template.index.php','template.index.ts'];
         foreach ($templates as $template) {
             $content = file_get_contents($templatePath.'/templates/'.$template);
             file_put_contents($this->themePath.'/templates/'.$template,$content);
