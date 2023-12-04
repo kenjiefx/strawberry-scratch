@@ -15,9 +15,9 @@
     <body class="width-24">
         <app xstrawberry="app" class="width-24"></app>
         <template xstrawberry="app">
-            <section xcomponent="@Router" class="width-24"></section>
+            <section xcomponent="@AppRouter" class="width-24"></section>
         </template>
-        <?php component('Router'); ?>
+        <?php template_content(); ?>
         <?php Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry::export(); ?>
     </body>
 </html>

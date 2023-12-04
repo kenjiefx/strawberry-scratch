@@ -1,0 +1,24 @@
+main {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-family: Arial;
+    background: rgb(255,240,247);
+    background: radial-gradient(circle, rgba(255,240,247,1) 0%, rgba(239,248,249,1) 50%, rgba(240,247,255,1) 100%);
+    color: #7e64bf;
+}
+
+.site-title {
+    font-size: 3em;
+    font-weight: bold;
+    letter-spacing: -0.03em;
+    text-shadow: 1px 0 0 currentColor;
+}
+
+.site-description {
+    font-size: 0.95em;
+    margin-top: 0.3;
+}

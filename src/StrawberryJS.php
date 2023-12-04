@@ -12,6 +12,7 @@ use Kenjiefx\ScratchPHP\App\Events\OnCreateComponentJsEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateTemplateEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateThemeEvent;
 use Kenjiefx\ScratchPHP\App\Interfaces\ExtensionsInterface;
+use Kenjiefx\ScratchPHP\App\Templates\TemplateController;
 use Kenjiefx\ScratchPHP\App\Themes\ThemeController;
 use Kenjiefx\StrawberryScratch\NodeMinifier\NodeMinifier;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
@@ -110,12 +111,14 @@ class StrawberryJS implements ExtensionsInterface
                                ->setBuiltInServices(__dir__.'/templates/services')
                                ->setBuiltInInterfaces(__dir__.'/templates/interfaces')
                                ->setThemeIndex(__dir__.'/templates/index.php')
-                               ->setBuiltInComponents(__dir__.'/templates')
                                ->setBuiltInTemplates(__dir__.'/templates');
     }
 
     #[ListensTo(OnCreateTemplateEvent::class)]
-    public function onCreateTemplate(){
+    public function onCreateTemplate(TemplateController $TemplateController){
+        $templateName = $TemplateController->getTemplateName();
+        $typeScriptPath = $TemplateController->getTemplatesDir().'/template.'.$templateName.'.ts';
+        file_put_contents($typeScriptPath,file_get_contents(__dir__.'/templates/templates/template.index.ts'));
         return file_get_contents(__dir__.'/templates/templates/template.index.php');
     }
     
