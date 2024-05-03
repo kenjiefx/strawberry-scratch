@@ -116,9 +116,24 @@ class StrawberryJS implements ExtensionsInterface
 
     #[ListensTo(OnCreateTemplateEvent::class)]
     public function onCreateTemplate(TemplateController $TemplateController){
-        $templateName = $TemplateController->getTemplateName();
-        $typeScriptPath = $TemplateController->getTemplatesDir().'/template.'.$templateName.'.ts';
-        file_put_contents($typeScriptPath,file_get_contents(__dir__.'/templates/templates/template.index.ts'));
+
+        # Validations
+        $templateName   = $TemplateController->getTemplateName();
+        $typeScriptPath = $TemplateController->getTemplatesDir().'/'.$templateName.'.ts';
+        $templateSubDir = dirname($typeScriptPath);
+        if (!is_dir($templateSubDir)) {
+            throw new \Exception('StrawberryJS: Unable to create typescript file for new template. ' .
+                'Please make sure that the directory exists within the template directory: "' .
+                $templateSubDir.'"');
+        }
+
+        # Converting into relative paths
+        $pathNames = explode('/',$templateName);
+        $converted = array_map(function($pathName){return '..';},$pathNames);
+        $relPath   = implode('/',$converted);
+        $typeScr   = file_get_contents(__dir__.'/templates/templates/template.index.ts');
+        
+        file_put_contents($typeScriptPath,str_replace('==RELATIVE_PATH==',$relPath,$typeScr));
         return file_get_contents(__dir__.'/templates/templates/template.index.php');
     }
     
