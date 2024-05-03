@@ -10,6 +10,7 @@ Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry::register('Footer');
     </div>
     <div xif="state=='active'">
         <section xcomponent="@Header"></section>
+        <section xcomponent="@Header"></section>
         <section xcomponent="@Footer"></section>
     </div>
     <div xif="state=='error'">

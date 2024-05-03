@@ -1,3 +1,4 @@
+import { Header } from "../components/Header/Header"
 import { app, ScopeObject, PatchHelper, AppInstance } from "../strawberry/app"
 import { StateManagerFactory } from "../strawberry/factories/StateManager"
 import { EventManagerInterface } from "../strawberry/services/EventManager"
@@ -34,7 +35,8 @@ app.component<AppRouter>('AppRouter',(
     $patch: PatchHelper,
     StateManager: StateManagerFactory,
     $app: AppInstance,
-    EventManager: EventManagerInterface
+    EventManager: EventManagerInterface,
+    Header: Header
 )=>{
     const ComponentState = new StateManager<RouterState>
     ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
@@ -49,8 +51,9 @@ app.component<AppRouter>('AppRouter',(
         if ($scope.state==='error') return
         setTimeout(async ()=>{
             await ComponentState.switch('active')
+            await Header.render()
             EventManager.dispatch('PageActivationEvent')
-        },2000)
+        },500)
     })
     
     return {
