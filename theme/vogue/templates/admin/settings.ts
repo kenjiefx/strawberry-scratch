@@ -1,6 +1,6 @@
-import { app, ScopeObject, PatchHelper, AppInstance } from "==RELATIVE_PATH==/strawberry/app"
-import { StateManagerFactory } from "==RELATIVE_PATH==/strawberry/factories/StateManager"
-import { EventManagerInterface } from "==RELATIVE_PATH==/strawberry/services/EventManager"
+import { app, ScopeObject, PatchHelper, AppInstance } from "../../strawberry/app"
+import { StateManagerFactory } from "../../strawberry/factories/StateManager"
+import { EventManagerInterface } from "../../strawberry/services/EventManager"
 
 
 /** States of the component */
