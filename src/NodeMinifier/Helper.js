@@ -40,6 +40,14 @@ const strawberry = {
                     arguments: fa(callback.toString())
                 }
             },
+            helper:(name,callback)=>{
+                registry[name]={
+                    type:'helper',
+                    head: fh(callback.toString()),
+                    body: fb(callback.toString()),
+                    arguments: fa(callback.toString())
+                }
+            },
             component:(name,callback)=>{
                 registry[name]={
                     type:'component',

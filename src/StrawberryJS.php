@@ -17,6 +17,7 @@ use Kenjiefx\ScratchPHP\App\Themes\ThemeController;
 use Kenjiefx\StrawberryScratch\NodeMinifier\NodeMinifier;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
+use Kenjiefx\StrawberryScratch\Registry\HelpersRegistry;
 use Kenjiefx\StrawberryScratch\Registry\ServicesRegistry;
 use Kenjiefx\StrawberryScratch\Services\ImportsStripper;
 use Kenjiefx\StrawberryScratch\Services\ObfuscatorService;
@@ -37,6 +38,7 @@ class StrawberryJS implements ExtensionsInterface
         private GlobalFunctionsRegistry $globalFunctionsRegistry,
         private FactoriesRegistry $factoriesRegistry,
         private ServicesRegistry $servicesRegistry,
+        private HelpersRegistry $helpersRegistry,
         private NodeMinifier $jSMinifier,
         private ThemeInitializer $themeInitializer
     ){
@@ -65,11 +67,13 @@ class StrawberryJS implements ExtensionsInterface
 
         $this->factoriesRegistry->discoverFactories();
         $this->servicesRegistry->discoverServices();
+        $this->helpersRegistry->discoverHelpers();
         
         $factoriesScript = $this->factoriesRegistry->getScriptsBasedOnUsage($pageJS);
         $servicesScript = $this->servicesRegistry->getScriptsBasedOnUsage($pageJS);
+        $helpersScript = $this->helpersRegistry->getScriptsBasedOnUsage($pageJS);
 
-        $obfuscatedJs = $globalsScript.$factoriesScript.$servicesScript.$pageJS;
+        $obfuscatedJs = $globalsScript.$factoriesScript.$servicesScript.$helpersScript.$pageJS;
 
         if (StrawberryConfig::stripImports()){
             $obfuscatedJs = $this->importsStripper->stripOff($obfuscatedJs);

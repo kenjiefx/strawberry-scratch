@@ -1,4 +1,5 @@
 import { app } from "../app";
+import { TestHelper } from "../helpers/TestHelper";
 
 export interface EventManagerInterface {
     register:(name:string)=>void

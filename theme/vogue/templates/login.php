@@ -9,6 +9,7 @@ Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry::register('Footer');
         <!-- Apply your Loading animation here -->
     </div>
     <div xif="state=='active'">
+        <button xclick="TestHelper.exec()">Execute From Helper</button>
         <section xcomponent="@Header"></section>
         <section xcomponent="@Header"></section>
         <section xcomponent="@Footer"></section>

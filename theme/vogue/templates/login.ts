@@ -1,6 +1,7 @@
 import { Header } from "../components/Header/Header"
 import { app, ScopeObject, PatchHelper, AppInstance } from "../strawberry/app"
 import { StateManagerFactory } from "../strawberry/factories/StateManager"
+import { TestHelper } from "../strawberry/helpers/TestHelper"
 import { EventManagerInterface } from "../strawberry/services/EventManager"
 
 
@@ -36,7 +37,8 @@ app.component<AppRouter>('AppRouter',(
     StateManager: StateManagerFactory,
     $app: AppInstance,
     EventManager: EventManagerInterface,
-    Header: Header
+    Header: Header,
+    TestHelper: TestHelper
 )=>{
     const ComponentState = new StateManager<RouterState>
     ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
