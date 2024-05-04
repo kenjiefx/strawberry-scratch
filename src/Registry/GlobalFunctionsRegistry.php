@@ -7,7 +7,8 @@ class GlobalFunctionsRegistry
     private static array $globals = [
         'app.factory' => '',
         'app.component' => '',
-        'app.service' => ''
+        'app.service' => '',
+        'app.helper' => '',
     ];
 
     public function __construct(

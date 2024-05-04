@@ -23,6 +23,14 @@ export interface StrawberryApp {
      * @param callback - The callback function that returns methods and properties implemented by `TFactory`
      */
     factory:<TFactory>(name:string,callback:FactoryCallbackFunction<any[]>)=>void
+
+    /**
+     * Registers a helper in your application. You can pass the type or interface
+     * of the service `<THelper>`
+     * @param name  - The name of the service
+     * @param callback - The callback function that returns methods and properties implemented by `THelper`
+     */
+    helper:<THelper>(name:string,callback:CallbackFunction<unknown[],THelper>)=>void
 }
 
 type CallbackFunction<TDependecies extends unknown[],TObject> = (...args: TDependecies) => TObject
@@ -85,5 +93,6 @@ export type BlockElement=<TElement>(
 export const app:StrawberryApp = {
     component:()=>{},
     service:()=>{},
-    factory:()=>{}
+    factory:()=>{},
+    helper:()=>{}
 }

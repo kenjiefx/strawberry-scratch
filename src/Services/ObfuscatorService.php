@@ -4,6 +4,7 @@ namespace Kenjiefx\StrawberryScratch\Services;
 use Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
+use Kenjiefx\StrawberryScratch\Registry\HelpersRegistry;
 use Kenjiefx\StrawberryScratch\Registry\ServicesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\TokenRegistry;
 
@@ -23,6 +24,7 @@ class ObfuscatorService
         private ComponentsRegistry $componentsRegistry,
         private ServicesRegistry $servicesRegistry,
         private FactoriesRegistry $factoriesRegistry,
+        private HelpersRegistry $helpersRegistry,
         private GlobalFunctionsRegistry $globalFunctionsRegistry,
         private DependencyParser $dependencyParser
     ){
@@ -63,6 +65,16 @@ class ObfuscatorService
             }
         }
 
+        # Obfuscation of Helpers 
+        $helpers = $this->helpersRegistry->getHelpers();
+        foreach ($helpers as $helper => $minifiedName) {
+            $jsSource = str_replace("app.helper('".$helper,"app.helper('".$minifiedName,$jsSource);
+            foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($helper) as $format) {
+                $replacedFormat = str_replace($helper,$minifiedName,$format);
+                $jsSource = str_replace($format,$replacedFormat,$jsSource);
+            }
+        }
+
         # Obfuscation of Factories 
         $factories = $this->factoriesRegistry->getFactories();
         foreach ($factories as $factory => $minifiedName) {
@@ -95,6 +107,7 @@ class ObfuscatorService
         $obfuscatedGlobScr .= 'const '.$globalSubs['app.factory'].'='.$globalSubs['StrawberryApp'].'.factory,';
         $obfuscatedGlobScr .= $globalSubs['app.service'].'='.$globalSubs['StrawberryApp'].'.service,';
         $obfuscatedGlobScr .= $globalSubs['app.component'].'='.$globalSubs['StrawberryApp'].'.component;';
+        $obfuscatedGlobScr .= $globalSubs['app.helper'].'='.$globalSubs['StrawberryApp'].'.helper;';
         $jsSource = str_replace(
             'const app = strawberry.create("app");',
             $obfuscatedGlobScr,
