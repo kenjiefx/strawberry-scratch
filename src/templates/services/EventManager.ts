@@ -28,7 +28,7 @@ app.service<EventManagerInterface>('EventManager',()=>{
         dispatch(name: string){
             if (!this.events.hasOwnProperty(name)) return
             this.events[name].getListeners().forEach(async (callback)=>{
-                await Promise.resolve(callback())
+                Promise.resolve(callback())
             })
         }
     }
