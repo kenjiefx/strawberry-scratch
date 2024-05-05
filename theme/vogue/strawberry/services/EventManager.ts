@@ -1,55 +1,73 @@
 import { app } from "../app";
-import { TestHelper } from "../helpers/TestHelper";
 
+/**
+ * Interface for managing events within your application
+ */
 export interface EventManagerInterface {
-    register:(name:string)=>void
-    subscribe:(name:string,listener:()=>any) => void
-    dispatch:(name:string)=>void
+
+    /**
+     * Register a new event name.
+     * @param name - The name of the event to register.
+     */
+    __register:(name:string)=>void
+
+    /**
+     * Subscribe to an event.
+     * @param name - The name of the event to subscribe to.
+     * @param listener - The listener function to be called when the event is dispatched.
+     */
+    __subscribe:(name:string,listener:()=>any) => void
+
+    /**
+     * Dispatch an event.
+     * @param name - The name of the event to dispatch.
+     */
+    __dispatch:(name:string)=>void
 }
 
 app.service<EventManagerInterface>('EventManager',()=>{
-    class Manager implements EventManagerInterface {
-        private events: {[key:string]:Event}
+    class __EvManager implements EventManagerInterface {
+        private __events: {[key:string]:__Event}
         constructor(){
-            this.events = {}
+            this.__events = {}
         }
-        register(name: string){
-            const event = new Event 
-            event.setName(name)
-            if (!this.events.hasOwnProperty(name)) {
-                this.events[name] = event
+        __register(name: string){
+            const event = new __Event 
+            event.__setName(name)
+            if (!(name in this.__events)) {
+                this.__events[name] = event
             }
         }
-        subscribe(name: string, listener: () => any){
-            if (!this.events.hasOwnProperty(name)) {
-                this.register(name)
+        __subscribe(name: string, listener: () => any){
+            if (!(name in this.__events)) {
+                this.__register(name)
             } 
-            this.events[name].addListener(listener)
+            this.__events[name].__addListener(listener)
         }
-        dispatch(name: string){
-            if (!this.events.hasOwnProperty(name)) return
-            const events = this.events[name].getListeners()
-            this.events[name].getListeners().forEach((callback)=>{
+        __dispatch(name: string){
+            if (!(name in this.__events)) return
+            const events = this.__events[name].__getListeners()
+            this.__events[name].__getListeners().forEach((callback)=>{
                 Promise.resolve(callback())
             })
         }
     }
-    class Event {
-        private name: string
-        private listeners: Array<()=>any>
+    class __Event {
+        private __name: string
+        private __listeners: Array<()=>any>
         constructor(){
-            this.name = '',
-            this.listeners = []
+            this.__name = '',
+            this.__listeners = []
         }
-        setName(name:string){
-            this.name = name 
+        __setName(name:string){
+            this.__name = name 
         }
-        addListener(listener:()=>any){
-            this.listeners.push(listener)
+        __addListener(listener:()=>any){
+            this.__listeners.push(listener)
         }
-        getListeners(){
-            return this.listeners
+        __getListeners(){
+            return this.__listeners
         }
     }
-    return new Manager
+    return new __EvManager
 })

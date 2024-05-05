@@ -1,5 +1,5 @@
 import { app, ScopeObject, PatchHelper, AppInstance } from "../strawberry/app"
-import { StateManagerFactory } from "../strawberry/factories/StateManager"
+import { StateManager } from "../strawberry/helpers/StateManager"
 import { EventManagerInterface } from "../strawberry/services/EventManager"
 
 
@@ -32,24 +32,22 @@ export interface AppRouter {
 app.component<AppRouter>('AppRouter',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManagerFactory,
+    StateManager: StateManager,
     $app: AppInstance,
     EventManager: EventManagerInterface
 )=>{
-    const ComponentState = new StateManager<RouterState>
-    ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
-    EventManager.register('PageActivationEvent')
-    EventManager.subscribe('PageErrorEvent',()=>{
+    EventManager.__register('PageActivationEvent')
+    EventManager.__subscribe('PageErrorEvent',()=>{
         $scope.state = 'error'
         $patch()
     })
     $app.onReady(()=>{
-        ComponentState.switch('loading')
+        StateManager.__switch('loading')
         /** Apply your activation logic here */
         if ($scope.state==='error') return
         setTimeout(async ()=>{
-            await ComponentState.switch('active')
-            EventManager.dispatch('PageActivationEvent')
+            await StateManager.__switch('active')
+            EventManager.__dispatch('PageActivationEvent')
         },2000)
     })
     
@@ -57,7 +55,7 @@ app.component<AppRouter>('AppRouter',(
         subscribeEvent:()=>{
             return {
                 pageActive:(listener)=>{
-                    EventManager.subscribe('PageActivationEvent',listener)
+                    EventManager.__subscribe('PageActivationEvent',listener)
                 }
             }
         }

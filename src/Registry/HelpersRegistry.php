@@ -31,7 +31,7 @@ class HelpersRegistry
                 $scriptContent = file_get_contents($filePath);
                 $this->auxiliaryRegistry->addScript($serviceName,$scriptContent);
                 
-                $dependencies = $this->dependencyParser->listDependencies($scriptContent,'helpers');
+                $dependencies = $this->dependencyParser->listDependencies($scriptContent,'helper');
                 $this->auxiliaryRegistry->addDependency(
                     scriptName: $serviceName,
                     dependecyList: $dependencies
@@ -56,7 +56,7 @@ class HelpersRegistry
         $importer = new DependencyImporter($this->auxiliaryRegistry);
         foreach (static::$services as $serviceName => $minifiedName) {
             $isBeingUsed = false;
-            foreach($this->dependencyParser->getAllUsageOccurencesByFormat($serviceName) as $occurenceFormat) {
+            foreach($this->dependencyParser->predictUsage($serviceName) as $occurenceFormat) {
                 if (str_contains($jsSource,$occurenceFormat)) {
                     $isBeingUsed = true;
                 }

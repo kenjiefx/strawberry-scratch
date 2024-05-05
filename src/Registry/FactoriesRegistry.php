@@ -11,10 +11,10 @@ class FactoriesRegistry
     private static array $factories = [];
 
     public function __construct(
-        private ThemeController $themeController,
-        private TokenRegistry $tokenRegistry,
-        private AuxiliaryRegistry $auxiliaryRegistry,
-        private DependencyParser $dependencyParser
+        protected ThemeController $themeController,
+        protected TokenRegistry $tokenRegistry,
+        protected AuxiliaryRegistry $auxiliaryRegistry,
+        protected DependencyParser $dependencyParser
     ){
 
     }
@@ -57,7 +57,7 @@ class FactoriesRegistry
         $importer = new DependencyImporter($this->auxiliaryRegistry);
         foreach (static::$factories as $factoryName => $minifiedName) {
             $isBeingUsed = false;
-            foreach($this->dependencyParser->getAllUsageOccurencesByFormat($factoryName) as $occurenceFormat) {
+            foreach($this->dependencyParser->predictUsage($factoryName) as $occurenceFormat) {
                 if (str_contains($jsSource,$occurenceFormat)) {
                     $isBeingUsed = true;
                 }

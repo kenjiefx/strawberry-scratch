@@ -53,49 +53,32 @@ class ObfuscatorService
     }
 
     public function obfuscateJs(
-        string $jsSource
+        string $jscode
     ){
-        # Obfuscation of Components
-        $components = $this->componentsRegistry->getComponents();
-        foreach ($components as $componentName => $minifiedName) {
-            $jsSource = str_replace("app.component('".$componentName,"app.component('".$minifiedName,$jsSource);
-            foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($componentName) as $format) {
-                $replacedFormat = str_replace($componentName,$minifiedName,$format);
-                $jsSource = str_replace($format,$replacedFormat,$jsSource);
+
+        $registries = [
+            'component' => $this->componentsRegistry->getComponents(),
+            'helper' => $this->helpersRegistry->getHelpers(),
+            'factory' => $this->factoriesRegistry->getFactories(),
+            'service' => $this->servicesRegistry->getServices()
+        ];
+
+        foreach ($registries as $key => $items) {
+            foreach ($items as $fullname => $minfdname) {
+                $jscode = \str_replace(
+                    \sprintf('app.%s(\'%s',$key,$fullname),
+                    \sprintf('app.%s(\'%s',$key,$minfdname),
+                    $jscode
+                );
+                $possible_occurences = $this->dependencyParser->predictUsage($fullname);
+                foreach ($possible_occurences as $format) {
+                    $minifiedver = str_replace($fullname,$minfdname,$format);
+                    $jscode    = str_replace($format,$minifiedver,$jscode);
+                }
             }
         }
 
-        # Obfuscation of Helpers 
-        $helpers = $this->helpersRegistry->getHelpers();
-        foreach ($helpers as $helper => $minifiedName) {
-            $jsSource = str_replace("app.helper('".$helper,"app.helper('".$minifiedName,$jsSource);
-            foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($helper) as $format) {
-                $replacedFormat = str_replace($helper,$minifiedName,$format);
-                $jsSource = str_replace($format,$replacedFormat,$jsSource);
-            }
-        }
-
-        # Obfuscation of Factories 
-        $factories = $this->factoriesRegistry->getFactories();
-        foreach ($factories as $factory => $minifiedName) {
-            $jsSource = str_replace("app.factory('".$factory,"app.factory('".$minifiedName,$jsSource);
-            foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($factory) as $format) {
-                $replacedFormat = str_replace($factory,$minifiedName,$format);
-                $jsSource = str_replace($format,$replacedFormat,$jsSource);
-            }
-        }
-
-        # Obfuscation of Services 
-        $services = $this->servicesRegistry->getServices();
-        foreach ($services as $service => $minifiedName) {
-            $jsSource = str_replace("app.service('".$service,"app.service('".$minifiedName,$jsSource);
-            foreach ($this->dependencyParser->getAllUsageOccurencesByFormat($service) as $format) {
-                $replacedFormat = str_replace($service,$minifiedName,$format);
-                $jsSource = str_replace($format,$replacedFormat,$jsSource);
-            }
-        }
-
-        return $jsSource;
+        return $jscode;
     }
 
     public function obfuscateStrawberryMethods(

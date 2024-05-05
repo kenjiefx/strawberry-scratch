@@ -10,6 +10,14 @@ class ThemeInitializer
     private string $servicesDir;
     private string $factoryDir;
 
+    private string $exceptionsDir;
+
+    private string $interfacesDir;
+
+    private string $helpersDir;
+
+    private string $eventsDir;
+
     public function __construct(){
 
     }
@@ -17,12 +25,18 @@ class ThemeInitializer
     public function mountThemePath(string $path) {
         $this->themePath     = $path;
         $this->strawberryDir = $path.'/strawberry';
-        $this->servicesDir   = $path.'/strawberry/services';
         $this->factoryDir    = $path.'/strawberry/factories';
+        $this->exceptionsDir = $path.'/strawberry/factories/exceptions';
+        $this->helpersDir    = $path.'/strawberry/helpers';
+        $this->servicesDir   = $path.'/strawberry/services';
+        $this->eventsDir     = $path.'/strawberry/services/events';
         $this->interfacesDir = $path.'/strawberry/interfaces';
         mkdir($this->strawberryDir);
-        mkdir($this->servicesDir);
         mkdir($this->factoryDir);
+        mkdir($this->exceptionsDir);
+        mkdir($this->helpersDir);
+        mkdir($this->servicesDir);
+        mkdir($this->eventsDir);
         mkdir($this->interfacesDir);
         return $this;
     }
@@ -34,7 +48,12 @@ class ThemeInitializer
     }
 
     public function setBuiltInFactories (string $templatePath){
-        $factories = ['StateManager.ts','AppConfig.ts','AppEnvironment.ts'];
+        $factories = [
+            'exceptions/FatalException.ts',
+            'exceptions/InvalidArgumentException.ts',
+            'AppConfig.ts',
+            'AppEnvironment.ts'
+        ];
         foreach ($factories as $factory) {
             $content = file_get_contents($templatePath.'/'.$factory);
             file_put_contents($this->factoryDir.'/'.$factory,$content);
@@ -42,8 +61,29 @@ class ThemeInitializer
         return $this;
     }
 
+    public function setBuiltInHelpers (string $templatePath){
+        $helpers = [
+            'BlockManager.ts',
+            'ModalManager.ts',
+            'StateManager.ts'
+        ];
+        foreach ($helpers as $helper) {
+            $content = file_get_contents($templatePath.'/'.$helper);
+            file_put_contents($this->helpersDir.'/'.$helper,$content);
+        }
+        return $this;
+    }
+
     public function setBuiltInServices(string $templatePath){
-        $services = ['ErrorHandler.ts','EventManager.ts','HttpRequestHelper.ts'];
+        $services = [
+            'events/PageActivationEvent.ts',
+            'events/PageErrorEvent.ts',
+            'events/ToastErrorEvent.ts',
+            'events/ToastInfoEvent.ts',
+            'events/ToastSuccessEvent.ts',
+            'events/ToastWarningEvent.ts',
+            'EventManager.ts'
+        ];
         foreach ($services as $service) {
             $content = file_get_contents($templatePath.'/'.$service);
             file_put_contents($this->servicesDir.'/'.$service,$content);

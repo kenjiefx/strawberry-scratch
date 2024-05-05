@@ -1,8 +1,13 @@
 import { Header } from "../components/Header/Header"
+import { Profile } from "../components/Profile/Profile"
 import { app, ScopeObject, PatchHelper, AppInstance } from "../strawberry/app"
-import { StateManagerFactory } from "../strawberry/factories/StateManager"
+import { BlockManager } from "../strawberry/helpers/BlockManager"
+import { ModalManager } from "../strawberry/helpers/ModalManager"
+import { StateManager } from "../strawberry/helpers/StateManager"
 import { TestHelper } from "../strawberry/helpers/TestHelper"
-import { EventManagerInterface } from "../strawberry/services/EventManager"
+import { PageActivationEvent } from "../strawberry/services/events/PageActivationEvent"
+import { PageErrorEvent } from "../strawberry/services/events/PageErrorEvent"
+import { ToastErrorEvent } from "../strawberry/services/events/ToastErrorEvent"
 
 
 /** States of the component */
@@ -34,27 +39,46 @@ export interface AppRouter {
 app.component<AppRouter>('AppRouter',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManagerFactory,
+    StateManager: StateManager,
     $app: AppInstance,
-    EventManager: EventManagerInterface,
     Header: Header,
-    TestHelper: TestHelper
+    PageActivationEvent: PageActivationEvent,
+    PageErrorEvent: PageErrorEvent,
+    BlockManager: BlockManager,
+    TestHelper: TestHelper,
+    ModalManager: ModalManager,
+    ToastErrorEvent: ToastErrorEvent,
+    Profile: Profile
 )=>{
-    const ComponentState = new StateManager<RouterState>
-    ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
-    EventManager.register('PageActivationEvent')
-    EventManager.subscribe('PageErrorEvent',()=>{
-        $scope.state = 'error'
-        $patch()
+    const TestBlock = BlockManager.__bind('/BlockManager/TestActionBlocks/')
+    const BlockWithinModal = BlockManager.__bind('/BlockManager/BlockWithinModal/')
+    const TestModal = ModalManager.__bind('/ModalManager/TestModal/')
+    TestModal.__events().__whenOpened(()=>{
+        BlockWithinModal.__toActive()
+    })
+    TestBlock.__register('showModal',async (button)=>{
+        console.log('show modal was clicked')
+        console.log(button)
+        await TestModal.__open()
+    })
+    PageErrorEvent.__subscribe(()=>{
+        console.log('error event fired!')
+        StateManager.__switch('error')
+    })
+    ToastErrorEvent.__subscribe(()=>{
+        console.log('toaster fired')
     })
     $app.onReady(()=>{
-        ComponentState.switch('loading')
+        StateManager.__switch('loading')
         /** Apply your activation logic here */
         if ($scope.state==='error') return
         setTimeout(async ()=>{
-            await ComponentState.switch('active')
+            await StateManager.__switch('active')
             await Header.render()
-            EventManager.dispatch('PageActivationEvent')
+            await Profile.render()
+            TestBlock.__toActive()
+            BlockWithinModal.__toEmpty()
+            PageActivationEvent.__dispatch()
         },500)
     })
     
@@ -62,7 +86,7 @@ app.component<AppRouter>('AppRouter',(
         subscribeEvent:()=>{
             return {
                 pageActive:(listener)=>{
-                    EventManager.subscribe('PageActivationEvent',listener)
+                    PageActivationEvent.__subscribe(listener)
                 }
             }
         }

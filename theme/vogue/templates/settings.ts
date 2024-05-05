@@ -1,6 +1,8 @@
 import { app, ScopeObject, PatchHelper, AppInstance } from "../strawberry/app"
-import { StateManagerFactory } from "../strawberry/factories/StateManager"
+import { StateManager } from "../strawberry/helpers/StateManager"
 import { EventManagerInterface } from "../strawberry/services/EventManager"
+import { PageActivationEvent } from "../strawberry/services/events/PageActivationEvent"
+import { PageErrorEvent } from "../strawberry/services/events/PageErrorEvent"
 
 
 /** States of the component */
@@ -32,24 +34,22 @@ export interface AppRouter {
 app.component<AppRouter>('AppRouter',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManagerFactory,
+    StateManager: StateManager,
     $app: AppInstance,
-    EventManager: EventManagerInterface
+    EventManager: EventManagerInterface,
+    PageActivationEvent: PageActivationEvent,
+    PageErrorEvent: PageErrorEvent
 )=>{
-    const ComponentState = new StateManager<RouterState>
-    ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
-    EventManager.register('PageActivationEvent')
-    EventManager.subscribe('PageErrorEvent',()=>{
-        $scope.state = 'error'
-        $patch()
+    PageErrorEvent.__subscribe(()=>{
+        StateManager.__switch('error')
     })
     $app.onReady(()=>{
-        ComponentState.switch('loading')
+        StateManager.__switch('loading')
         /** Apply your activation logic here */
         if ($scope.state==='error') return
         setTimeout(async ()=>{
-            await ComponentState.switch('active')
-            EventManager.dispatch('PageActivationEvent')
+            await StateManager.__switch('active')
+            PageActivationEvent.__dispatch()
         },2000)
     })
     
@@ -57,7 +57,7 @@ app.component<AppRouter>('AppRouter',(
         subscribeEvent:()=>{
             return {
                 pageActive:(listener)=>{
-                    EventManager.subscribe('PageActivationEvent',listener)
+                    PageActivationEvent.__subscribe(listener)
                 }
             }
         }
