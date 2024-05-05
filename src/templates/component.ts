@@ -1,15 +1,10 @@
 import { AppInstance, ChildComponentsHelper, PatchHelper, ScopeObject, app } from "../../strawberry/app"
-import { StateManagerFactory } from "../../strawberry/factories/StateManager"
+import { StateManager } from "../../strawberry/helpers/StateManager"
 
 /**
- * These are the different states of `COMPONENT_NAME` component. These states
- * are fed into the component's StateManager.
+ * Declare all the component props here
  */
-type COMPONENT_NAMEState = 'loading' | 'active' | 'error'
-
-/** Component Object */
 type ComponentScope = {
-    state: COMPONENT_NAMEState
 }
 
 
@@ -38,16 +33,19 @@ type ComponentChildren = {}
 app.component<COMPONENT_NAME>('COMPONENT_NAME',(
     $scope: ScopeObject<ComponentScope>,
     $patch: PatchHelper,
-    StateManager: StateManagerFactory,
+    StateManager: StateManager,
     $children: ChildComponentsHelper<ComponentChildren,keyof ComponentChildren>
 )=>{
-    const ComponentState = new StateManager<COMPONENT_NAMEState>
-    ComponentState.setScope($scope).setPatcher($patch).register('active').register('error').register('loading')
-
+    StateManager.__register('active',()=>{
+        return new Promise (async (resolve,reject)=>{
+            /** Anything you want to do afer the component is activated */
+            resolve()
+        })
+    })
     return {
         render:()=>{
             return new Promise(async (resolve,reject)=>{
-                await ComponentState.switch('active')
+                await StateManager.__switch('active')
                 resolve(null)
             })
         }

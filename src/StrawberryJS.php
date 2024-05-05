@@ -20,6 +20,7 @@ use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
 use Kenjiefx\StrawberryScratch\Registry\HelpersRegistry;
 use Kenjiefx\StrawberryScratch\Registry\ServicesRegistry;
 use Kenjiefx\StrawberryScratch\Services\ImportsStripper;
+use Kenjiefx\StrawberryScratch\Services\ManglerService;
 use Kenjiefx\StrawberryScratch\Services\ObfuscatorService;
 use Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry;
 use Kenjiefx\StrawberryScratch\Services\ThemeInitializer;
@@ -40,7 +41,8 @@ class StrawberryJS implements ExtensionsInterface
         private ServicesRegistry $servicesRegistry,
         private HelpersRegistry $helpersRegistry,
         private NodeMinifier $jSMinifier,
-        private ThemeInitializer $themeInitializer
+        private ThemeInitializer $themeInitializer,
+        private ManglerService $manglerService
     ){
 
     }
@@ -70,8 +72,8 @@ class StrawberryJS implements ExtensionsInterface
         $this->helpersRegistry->discoverHelpers();
         
         $factoriesScript = $this->factoriesRegistry->getScriptsBasedOnUsage($pageJS);
-        $servicesScript = $this->servicesRegistry->getScriptsBasedOnUsage($pageJS);
-        $helpersScript = $this->helpersRegistry->getScriptsBasedOnUsage($pageJS);
+        $servicesScript  = $this->servicesRegistry->getScriptsBasedOnUsage($pageJS);
+        $helpersScript   = $this->helpersRegistry->getScriptsBasedOnUsage($pageJS);
 
         $obfuscatedJs = $globalsScript.$factoriesScript.$servicesScript.$helpersScript.$pageJS;
 
@@ -80,7 +82,8 @@ class StrawberryJS implements ExtensionsInterface
         }
 
         if (StrawberryConfig::obfuscate()) {
-            $obfuscatedJs = $this->obfuscatorService->obfuscateJs($obfuscatedJs);
+            $mangledJs = ManglerService::mangle(($obfuscatedJs));
+            $obfuscatedJs = $this->obfuscatorService->obfuscateJs($mangledJs);
             $this->jSMinifier->setCodeBlock($obfuscatedJs);
             $obfuscatedJs = $this->jSMinifier->minify();
             $obfuscatedJs = $this->obfuscatorService->obfuscateStrawberryMethods($obfuscatedJs);
@@ -98,7 +101,6 @@ class StrawberryJS implements ExtensionsInterface
         return null;
     }
 
-    #[ListensTo(OnCreateComponentJsEvent::class)]
     public function onCreateComponentJS(ComponentController $ComponentController) {
         $javascript    = $ComponentController->getComponent()->getJavascript();
         $template      = file_get_contents(__dir__.'/templates/component.ts');
@@ -106,7 +108,6 @@ class StrawberryJS implements ExtensionsInterface
         $ComponentController->getComponent()->setJavascript($javascript.$modJavascript);
     }
 
-    #[ListensTo(OnCreateThemeEvent::class)]
     public function onCreateTheme(ThemeController $ThemeController){
         $themePath = $ThemeController->getThemeDirPath();
         $this->themeInitializer->mountThemePath($themePath)
@@ -118,7 +119,6 @@ class StrawberryJS implements ExtensionsInterface
                                ->setBuiltInTemplates(__dir__.'/templates');
     }
 
-    #[ListensTo(OnCreateTemplateEvent::class)]
     public function onCreateTemplate(TemplateController $TemplateController){
 
         # Validations

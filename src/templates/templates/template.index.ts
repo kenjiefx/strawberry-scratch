@@ -3,12 +3,10 @@ import { StateManagerFactory } from "==RELATIVE_PATH==/strawberry/factories/Stat
 import { EventManagerInterface } from "==RELATIVE_PATH==/strawberry/services/EventManager"
 
 
-/** States of the component */
-type RouterState = 'loading' | 'active' | 'error'
-
-/** Component Object */
+/**
+ * Declare all the component props here
+ */
 type ComponentScope = {
-    state: RouterState
 }
 
 /** Exportables */

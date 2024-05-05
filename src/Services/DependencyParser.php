@@ -6,75 +6,109 @@ use Kenjiefx\StrawberryScratch\StrawberryJS;
 class DependencyParser
 {
     public function listDependencies(
-        string $scriptContent,
-        string $funcType
+        string $content,
+        string $type
     ){
-        $scriptChars = str_split($scriptContent);
-        $recordTrigger = str_split(StrawberryJS::APP_VAR_NAME.'.'.$funcType);
-        $dependencyDeclaration = '';
-        $recordTriggerPointer = 0;
-        $hasReachedOutFunction = false;
-        $isRecordingDeps = false;
-        foreach ($scriptChars as $scriptChar) {
-            if ($recordTriggerPointer>=count($recordTrigger)) {
-                if ($scriptChar==='('&&!$hasReachedOutFunction) {
-                    $hasReachedOutFunction = true;
+        
+        $chars = \str_split($content);
+
+        /** 
+         * Captures the keyword that serves as a trigger to start jotting 
+         * down dependency. For example, the keyword `app.helper` 
+         */
+        $trigger = \str_split(StrawberryJS::APP_VAR_NAME.'.'.$type);
+
+        /**
+         * A way to tell the parser that we have reached the trigger keyword
+         * to signal the start of jotting the callback function params
+         */
+        $hits_until_trigger = \count($trigger);
+        $hits = 0;
+
+        /**
+         * Even so we've reached the trigger above, we still need to wait until
+         * the parser arrives to the start of the callback function.
+         */
+        $reached_callb_params = false;
+
+        /**
+         * Once the parser is at the start of the callback fn params, we raised
+         * the flag to start jotting down the params
+         */
+        $isjotting = false;
+
+        /**
+         * Comma separated dependencies included as parameters
+         * to the function callback. 
+         */
+        $fnparameters = '';
+
+        foreach ($chars as $char) {
+            if ($hits>=$hits_until_trigger) {
+                if ($char==='('&&!$reached_callb_params) {
+                    $reached_callb_params = true;
                     continue;
                 }
-                if ($scriptChar==='('&&$hasReachedOutFunction) {
-                    $isRecordingDeps = true;
+                if ($char==='('&&$reached_callb_params) {
+                    # Starts jotting down the params
+                    $isjotting = true;
                     continue;
                 }
-                if ($isRecordingDeps&&$scriptChar!==')') {
-                    $dependencyDeclaration .= $scriptChar;
+                if ($isjotting&&$char!==')') {
+                    # Jots down the params
+                    $fnparameters .= $char;
                     continue;
                 }
-                if ($scriptChar===')'&&$isRecordingDeps) {
+                if ($char===')'&&$isjotting) {
+                    # Stops jotting down the params
                     break;
                 }
                 continue;
             }
-            if ($scriptChar===$recordTrigger[$recordTriggerPointer]) {
-                $recordTriggerPointer++;
+            if ($char===$trigger[$hits]) {
+                $hits++;
                 continue;
             } 
-            $recordTriggerPointer = 0;
+            $hits = 0;
         }
-        if (trim($dependencyDeclaration)==='') {
+        if (\trim($fnparameters)==='') {
             return [];
         }
-        $arrayOfDeps = [];
-        foreach (explode(',',$dependencyDeclaration) as $depDec) {
-            array_push($arrayOfDeps,trim($depDec));
+
+        $arraydeps = [];
+        foreach (\explode(',',$fnparameters) as $param) {
+            \array_push($arraydeps,trim($param));
         }
-        return $arrayOfDeps;
+        return $arraydeps;
     }
 
-    public function getAllUsageOccurencesByFormat(
-        string $dependencyName
+    public function predictUsage(
+        string $name
     ){
         return [
-            ','.$dependencyName.',',
-            ','.$dependencyName,
-            $dependencyName.',',
-            '= '.$dependencyName.' ',
-            '='.$dependencyName.' ',
-            '= '.$dependencyName.PHP_EOL,
-            '='.$dependencyName.PHP_EOL,
-            '= '.$dependencyName.'.',
-            '='.$dependencyName.'.',
-            '+'.$dependencyName.'.',
-            '+ '.$dependencyName.'.',
-            ' '.$dependencyName.'.',
-            '('.$dependencyName.')',
-            '( '.$dependencyName.' )',
-            ', '.$dependencyName.')',
-            ','.$dependencyName.')',
-            '( '.$dependencyName.',',
-            '('.$dependencyName.',',
-            '!'.$dependencyName.'.',
-            $dependencyName.'.',
-            'new '.$dependencyName
+            \sprintf(',%s,',$name),
+            \sprintf(',%s',$name),
+            \sprintf('%s,',$name),
+            \sprintf('= %s ',$name),
+            \sprintf('=%s ',$name),
+            \sprintf('= %s',$name).PHP_EOL,
+            \sprintf('=%s',$name).PHP_EOL,
+            \sprintf('= %s.',$name),
+            \sprintf('=%s.',$name),
+            \sprintf('+%s.',$name),
+            \sprintf('+ %s.',$name),
+            \sprintf(' %s.',$name),
+            \sprintf('(%s)',$name),
+            \sprintf('( %s )',$name),
+            \sprintf(', %s)',$name),
+            \sprintf(',%s)',$name),
+            \sprintf('( %s,',$name),
+            \sprintf('(%s,',$name),
+            \sprintf('!%s.',$name),
+            \sprintf('%s.',$name),
+            \sprintf('new %s',$name),
+            \sprintf('new %s(',$name),
+            \sprintf('new %s (',$name),
         ];
     }
 

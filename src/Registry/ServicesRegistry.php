@@ -56,7 +56,7 @@ class ServicesRegistry
         $importer = new DependencyImporter($this->auxiliaryRegistry);
         foreach (static::$services as $serviceName => $minifiedName) {
             $isBeingUsed = false;
-            foreach($this->dependencyParser->getAllUsageOccurencesByFormat($serviceName) as $occurenceFormat) {
+            foreach($this->dependencyParser->predictUsage($serviceName) as $occurenceFormat) {
                 if (str_contains($jsSource,$occurenceFormat)) {
                     $isBeingUsed = true;
                 }

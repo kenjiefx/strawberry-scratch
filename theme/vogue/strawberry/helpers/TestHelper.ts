@@ -4,7 +4,9 @@ app.helper<TestHelper>('TestHelper',(
     $scope: ScopeObject<TestHelperScope>
 )=>{
     $scope.TestHelper = {
-        exec: ()=>{
+        exec: (button)=>{
+            console.log(button)
+            console.log($scope)
             console.log('button was clicked!')
         }
     }
@@ -17,7 +19,7 @@ app.helper<TestHelper>('TestHelper',(
 
 type TestHelperScope = {
     TestHelper: {
-        exec:()=>void
+        exec:(button)=>void
     }
 }
 
