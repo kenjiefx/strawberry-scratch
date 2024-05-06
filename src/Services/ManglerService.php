@@ -38,7 +38,7 @@ class ManglerService {
 
         /** Takes all the convertible tokens from the source code */
         foreach (\explode("\n",$source_code) as $line) {
-            $eots = [' ','{','(','[',',',']',')','}','.',':'];
+            $eots = [' ','{','(','[',',',']',')','}','.',':','?'];
             $token = '';
             foreach (\str_split($line) as $char) {
                 $token .= $char;
