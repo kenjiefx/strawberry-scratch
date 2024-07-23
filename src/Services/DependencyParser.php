@@ -109,6 +109,7 @@ class DependencyParser
             \sprintf('new %s',$name),
             \sprintf('new %s(',$name),
             \sprintf('new %s (',$name),
+            \sprintf('%s;',$name)
         ];
     }
 
