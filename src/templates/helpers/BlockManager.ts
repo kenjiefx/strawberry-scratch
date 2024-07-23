@@ -1,5 +1,5 @@
-import { PatchHelper, ScopeObject, app } from "../app";
-import { FatalException } from "../factories/exceptions/FatalException";
+import { PatchAPI, ScopeObject, app } from "../interfaces/app"
+
 
 /**
  * Manages blocks within your component
@@ -58,13 +58,12 @@ export interface BlockManager {
 
 app.helper<BlockManager>('BlockManager',(
     $scope: ScopeObject<StateInstance>,
-    $patch: PatchHelper,
-    FatalException: FatalException
+    $patch: PatchAPI
 )=>{
     const blockmanager = 'BlockManager'
     class __ManagerHelper implements BlockManager {
         private __scope: StateInstance
-        private __patch: PatchHelper
+        private __patch: PatchAPI
         private __namespace: string
         private __name: string
         constructor(){
@@ -136,7 +135,7 @@ app.helper<BlockManager>('BlockManager',(
             manager.__namespace = blockname
             const tokens = blockname.split('/')
             if (tokens[0]!==''||tokens[1]!==blockmanager||tokens[2].length===0||tokens[3]!=='') {
-                new FatalException(`Invalid block namespace structure "${blockname}"`)
+                console.error(`Invalid block namespace structure "${blockname}"`)
                 return manager
             }
             manager.__name = tokens[2]
@@ -144,7 +143,7 @@ app.helper<BlockManager>('BlockManager',(
                 manager.__scope[blockmanager] = {}
             }
             if (manager.__name in manager.__scope[blockmanager]) {
-                new FatalException(`Duplicate block registration "${blockname}"`)
+                console.error(`Duplicate block registration "${blockname}"`)
                 return manager
             }
             manager.__scope[blockmanager][manager.__name] = {

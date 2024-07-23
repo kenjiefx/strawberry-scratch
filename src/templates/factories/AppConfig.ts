@@ -1,5 +1,5 @@
-import { app } from "../app";
-import { AppEnvironment, AppEnvironmentInterface } from "./AppEnvironment";
+import { app } from "../interfaces/app"
+import { AppEnvironment, AppEnvironmentInterface } from "./AppEnvironment"
 
 export interface AppConfigInterface {
 
@@ -11,7 +11,7 @@ app.factory('AppConfig',(
     AppEnvironment: AppEnvironment
 )=>{
     class AppConfig implements AppConfigInterface {
-        env:AppEnvironmentInterface
+        env: AppEnvironmentInterface
         constructor(){
             this.env = new AppEnvironment()
         }
