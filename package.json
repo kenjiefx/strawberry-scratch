@@ -1,7 +1,7 @@
 {
   "name": "strawberry-scratch",
   "version": "1.0.0",
-  "description": "StrawberryJS Extension for the Scratch PHP Site Generator",
+  "description": "plunc.js extension for the Scratch PHP Site Generator",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

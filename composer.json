@@ -1,6 +1,6 @@
 {
     "name": "kenjiefx/strawberry-scratch",
-    "description": "StrawberryJS Extension for the Scratch PHP Site Generator",
+    "description": "plunc.js extension for the Scratch PHP Site Generator",
     "type": "library",
     "license": "MIT",
     "autoload": {
