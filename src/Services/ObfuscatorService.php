@@ -1,12 +1,14 @@
 <?php
 
 namespace Kenjiefx\StrawberryScratch\Services;
+use Kenjiefx\StrawberryScratch\Registry\AttributeRegistry;
 use Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
-use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
+use Kenjiefx\StrawberryScratch\Registry\GlobalFnsRegistry;
 use Kenjiefx\StrawberryScratch\Registry\HelpersRegistry;
 use Kenjiefx\StrawberryScratch\Registry\ServicesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\TokenRegistry;
+use Kenjiefx\StrawberryScratch\StrawberryConfig;
 
 class ObfuscatorService
 {
@@ -20,44 +22,63 @@ class ObfuscatorService
     ];
 
     public function __construct(
-        private TokenRegistry $tokenRegistry,
-        private ComponentsRegistry $componentsRegistry,
+        private StrawberryConfig $StrawberryConfig,
+        private TokenRegistry $TokenRegistry,
+        private ComponentsRegistry $ComponentsRegistry,
+        private AttributeRegistry $AttributeRegistry,
         private ServicesRegistry $servicesRegistry,
         private FactoriesRegistry $factoriesRegistry,
         private HelpersRegistry $helpersRegistry,
-        private GlobalFunctionsRegistry $globalFunctionsRegistry,
+        private GlobalFnsRegistry $globalFunctionsRegistry,
         private DependencyParser $dependencyParser
     ){
-        $this->registerGlobalKeywords();
+        //$this->regGlobTokens();
     }
 
-    public function registerGlobalKeywords(){
+    public function regGlobTokens(){
         foreach ($this->globalKeywords as $globalKeyword) {
             TokenRegistry::register(keyword:$globalKeyword);
         }
     }
 
-    public function obfuscateHtml(
-        string $htmlSource
+    public function html(
+        string $html
     ){
-        # Obfuscating Components
-        $components = $this->componentsRegistry->getComponents();
-        foreach ($components as $componentName => $minifiedName) {
-            $htmlSource = str_replace(
-                'xcomponent="@'.$componentName.'"',
-                'xcomponent="@'.$minifiedName.'"',
-                $htmlSource
+        # Do not obfuscate if we're told not to
+        if (!$this->StrawberryConfig::obfuscate()) 
+            return $html;
+
+        # Obfuscating components
+        $components = $this->ComponentsRegistry::get();
+
+        # Takes the attributes for template and component name
+        $nameattr = $this->AttributeRegistry->name();  
+        $compattr = $this->AttributeRegistry->component();  
+
+        foreach ($components as $fullname => $minified) {
+            $html = \str_replace(
+                \sprintf('%s="%s"', $nameattr, $fullname),
+                \sprintf('%s="%s"', $nameattr, $minified),
+                $html
+            );
+            $html = \str_replace(
+                \sprintf('%s="%s"', $compattr, $fullname),
+                \sprintf('%s="%s"', $compattr, $minified),
+                $html
             );
         }
-        return $htmlSource;
+        return $html;
     }
 
-    public function obfuscateJs(
-        string $jscode
+    public function javascript(
+        string $script
     ){
+        # Do not obfuscate if we're told not to
+        if (!$this->StrawberryConfig::obfuscate()) 
+            return $script;
 
         $registries = [
-            'component' => $this->componentsRegistry->getComponents(),
+            'component' => $this->ComponentsRegistry->get(),
             'helper' => $this->helpersRegistry->getHelpers(),
             'factory' => $this->factoriesRegistry->getFactories(),
             'service' => $this->servicesRegistry->getServices()
@@ -65,41 +86,19 @@ class ObfuscatorService
 
         foreach ($registries as $key => $items) {
             foreach ($items as $fullname => $minfdname) {
-                $jscode = \str_replace(
+                $script = \str_replace(
                     \sprintf('app.%s(\'%s',$key,$fullname),
                     \sprintf('app.%s(\'%s',$key,$minfdname),
-                    $jscode
+                    $script
                 );
                 $possible_occurences = $this->dependencyParser->predictUsage($fullname);
                 foreach ($possible_occurences as $format) {
                     $minifiedver = str_replace($fullname,$minfdname,$format);
-                    $jscode    = str_replace($format,$minifiedver,$jscode);
+                    $script    = str_replace($format,$minifiedver,$script);
                 }
             }
         }
 
-        return $jscode;
-    }
-
-    public function obfuscateStrawberryMethods(
-        string $jsSource
-    ){
-        # Obfuscation Global Functions 
-        $globalSubs = $this->globalFunctionsRegistry->getGlobals();
-        $obfuscatedGlobScr = $globalSubs['const app = strawberry.create("app");'];
-        $obfuscatedGlobScr .= 'const '.$globalSubs['app.factory'].'='.$globalSubs['StrawberryApp'].'.factory,';
-        $obfuscatedGlobScr .= $globalSubs['app.service'].'='.$globalSubs['StrawberryApp'].'.service,';
-        $obfuscatedGlobScr .= $globalSubs['app.component'].'='.$globalSubs['StrawberryApp'].'.component;';
-        $obfuscatedGlobScr .= $globalSubs['app.helper'].'='.$globalSubs['StrawberryApp'].'.helper;';
-        $jsSource = str_replace(
-            'const app = strawberry.create("app");',
-            $obfuscatedGlobScr,
-            $jsSource
-        );
-        foreach ($globalSubs as $globalFunc => $globalSub) {
-            $jsSource = str_replace($globalFunc,$globalSub,$jsSource);
-        }
-
-        return $jsSource;
+        return $script;
     }
 }
