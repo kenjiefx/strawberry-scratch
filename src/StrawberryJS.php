@@ -16,10 +16,11 @@ use Kenjiefx\ScratchPHP\App\Templates\TemplateController;
 use Kenjiefx\ScratchPHP\App\Themes\ThemeController;
 use Kenjiefx\StrawberryScratch\NodeMinifier\NodeMinifier;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
-use Kenjiefx\StrawberryScratch\Registry\GlobalFunctionsRegistry;
+use Kenjiefx\StrawberryScratch\Registry\GlobalFnsRegistry;
 use Kenjiefx\StrawberryScratch\Registry\HelpersRegistry;
 use Kenjiefx\StrawberryScratch\Registry\ServicesRegistry;
 use Kenjiefx\StrawberryScratch\Services\ImportsStripper;
+use Kenjiefx\StrawberryScratch\Services\JSCompressor;
 use Kenjiefx\StrawberryScratch\Services\ManglerService;
 use Kenjiefx\StrawberryScratch\Services\ObfuscatorService;
 use Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry;
@@ -32,29 +33,24 @@ class StrawberryJS implements ExtensionsInterface
     private static $buildAppScript = false;
 
     public function __construct(
-        private ComponentsRegistry $componentsRegistry,
+        private ComponentsRegistry $ComponentsRegistry,
         private StrawberryConfig $strawberryConfig,
-        private ObfuscatorService $obfuscatorService,
-        private ImportsStripper $importsStripper,
-        private GlobalFunctionsRegistry $globalFunctionsRegistry,
-        private FactoriesRegistry $factoriesRegistry,
-        private ServicesRegistry $servicesRegistry,
+        private ObfuscatorService $ObfuscatorService,
+        private GlobalFnsRegistry $GlobalFunctionsRegistry,
+        private ImportsStripper $ImportsStripper,
+        private FactoriesRegistry $FactoriesRegistry,
+        private ServicesRegistry $ServicesRegistry,
         private HelpersRegistry $helpersRegistry,
-        private NodeMinifier $jSMinifier,
-        private ThemeInitializer $themeInitializer,
-        private ManglerService $manglerService
+        private JSCompressor $JSCompressor,
+        private NodeMinifier $NodeMinifier,
+        private ThemeInitializer $ThemeInitializer
     ){
 
     }
 
     #[ListensTo(OnBuildHtmlEvent::class)]
-    public function mutatePageHTML(string $pageHTML):string {
-        $obfuscatedHtml = $pageHTML;
-        if (StrawberryConfig::obfuscate()) {
-            $this->componentsRegistry->findComponents($pageHTML);
-            $obfuscatedHtml = $this->obfuscatorService->obfuscateHtml($obfuscatedHtml);
-        }
-        return $obfuscatedHtml;
+    public function HTMLProcessor(string $html):string {
+        return $this->ObfuscatorService->html($html);
     }
 
     #[ListensTo(OnSettingsRegistryEvent::class)]
@@ -63,82 +59,73 @@ class StrawberryJS implements ExtensionsInterface
     }
 
     #[ListensTo(OnBuildJsEvent::class)]
-    public function mutatePageJS(string $pageJS):string {
+    public function JavascriptProcessor(string $script):string {
 
-        $globalsScript = $this->globalFunctionsRegistry->importGlobals($pageJS);
-
-        $this->factoriesRegistry->discoverFactories();
-        $this->servicesRegistry->discoverServices();
-        $this->helpersRegistry->discoverHelpers();
+        # Registrations of global functions and auxiliary scripts
+        $this->GlobalFunctionsRegistry->register();
+        $this->FactoriesRegistry->register();
+        $this->ServicesRegistry->registry();
+        $this->helpersRegistry->register();
         
-        $factoriesScript = $this->factoriesRegistry->getScriptsBasedOnUsage($pageJS);
-        $servicesScript  = $this->servicesRegistry->getScriptsBasedOnUsage($pageJS);
-        $helpersScript   = $this->helpersRegistry->getScriptsBasedOnUsage($pageJS);
+        # Compilations based on script usage
+        $compiled = $this->GlobalFunctionsRegistry->prepend()
+                  . $this->FactoriesRegistry->compile($script)
+                  . $this->ServicesRegistry->compile($script)
+                  . $this->helpersRegistry->compile($script)
+                  . $script;
 
-        $obfuscatedJs = $globalsScript.$factoriesScript.$servicesScript.$helpersScript.$pageJS;
+        # Stripping off import and export statements
+        $compiled = $this->ImportsStripper->stripOff($compiled);
 
-        if (StrawberryConfig::stripImports()){
-            $obfuscatedJs = $this->importsStripper->stripOff($obfuscatedJs);
-        }
+        # Mangling service, if we're allowed to
+        $compiled = ManglerService::mangle($compiled);
 
-        if (StrawberryConfig::obfuscate()) {
-            $mangledJs = ManglerService::mangle(($obfuscatedJs));
-            $obfuscatedJs = $this->obfuscatorService->obfuscateJs($mangledJs);
-            $this->jSMinifier->setCodeBlock($obfuscatedJs);
-            $obfuscatedJs = $this->jSMinifier->minify();
-            $obfuscatedJs = $this->obfuscatorService->obfuscateStrawberryMethods($obfuscatedJs);
-        }
+        # Obfuscation of script content, if we're allowed to
+        $compiled = $this->ObfuscatorService->javascript($compiled);
 
-        return $obfuscatedJs;
+        # Compression of the script content, if we're allowed to
+        $compiled = $this->JSCompressor->compress($compiled);
+
+        # Minify the script, if we are allowed to
+        $compiled = $this->NodeMinifier->minify($compiled);
+
+        $this->ComponentsRegistry::clear();
+
+        return $compiled;
     }
 
     #[ListensTo(OnCreateComponentHtmlEvent::class)]
     public function onCreateComponentContent(ComponentController $ComponentController){
+        $name         = $ComponentController->getComponent()->getName();
         $html         = $ComponentController->getComponent()->getHtml();
-        $template     = file_get_contents(__dir__.'/templates/component.php');
-        $modifiedHtml = str_replace('COMPONENT_NAME',$ComponentController->getComponent()->getName(),$template);
-        $ComponentController->getComponent()->setHtml($html.$modifiedHtml);
+        $template     = file_get_contents(__dir__ . '/templates/component.php');
+        $ComponentController->getComponent()->setHtml(
+            str_replace('COMPONENT_NAME', $name, $template)
+        );
         return null;
     }
 
+    #[ListensTo(OnCreateComponentJsEvent::class)]
     public function onCreateComponentJS(ComponentController $ComponentController) {
+        $name          = $ComponentController->getComponent()->getName();
         $javascript    = $ComponentController->getComponent()->getJavascript();
-        $template      = file_get_contents(__dir__.'/templates/component.ts');
-        $modJavascript = str_replace('COMPONENT_NAME',$ComponentController->getComponent()->getName(),$template);
-        $ComponentController->getComponent()->setJavascript($javascript.$modJavascript);
+        $template      = file_get_contents(__dir__ . '/templates/component.ts');
+        $ComponentController->getComponent()->setJavascript(
+            str_replace('COMPONENT_NAME', $name, $template)
+        );
     }
 
+    #[ListensTo(OnCreateThemeEvent::class)]
     public function onCreateTheme(ThemeController $ThemeController){
         $themePath = $ThemeController->getThemeDirPath();
-        $this->themeInitializer->mountThemePath($themePath)
-                               ->dumpAppTypeDefs(__dir__.'/templates/app.ts')
-                               ->setBuiltInFactories(__dir__.'/templates/factories')
-                               ->setBuiltInServices(__dir__.'/templates/services')
-                               ->setBuiltInInterfaces(__dir__.'/templates/interfaces')
-                               ->setThemeIndex(__dir__.'/templates/index.php')
-                               ->setBuiltInTemplates(__dir__.'/templates');
-    }
-
-    public function onCreateTemplate(TemplateController $TemplateController){
-
-        # Validations
-        $templateName   = $TemplateController->getTemplateName();
-        $typeScriptPath = $TemplateController->getTemplatesDir().'/'.$templateName.'.ts';
-        $templateSubDir = dirname($typeScriptPath);
-        if (!is_dir($templateSubDir)) {
-            throw new \Exception('StrawberryJS: Unable to create typescript file for new template. ' .
-                'Please make sure that the directory exists within the template directory: "' .
-                $templateSubDir.'"');
-        }
-
-        # Converting into relative paths
-        $pathNames = explode('/',$templateName);
-        $converted = array_map(function($pathName){return '..';},$pathNames);
-        $relPath   = implode('/',$converted);
-        $typeScr   = file_get_contents(__dir__.'/templates/templates/template.index.ts');
-        
-        file_put_contents($typeScriptPath,str_replace('==RELATIVE_PATH==',$relPath,$typeScr));
-        return file_get_contents(__dir__.'/templates/templates/template.index.php');
+        $this->ThemeInitializer
+            ->mountThemePath($themePath)
+            ->setBuiltInFactories(__dir__.'/templates/factories')
+            ->setBuiltInServices(__dir__.'/templates/services')
+            ->setBuiltInHelpers(__dir__.'/templates/helpers')
+            ->setBuiltInInterfaces(__dir__.'/templates/interfaces')
+            ->setThemeIndex(__dir__.'/templates/index.php')
+            ->setBuiltInComponents(__dir__.'/templates/components');
     }
     
     #[ListensTo(OnBuildCompleteEvent::class)]

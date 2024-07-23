@@ -10,11 +10,11 @@ class ThemeInitializer
     private string $servicesDir;
     private string $factoryDir;
 
-    private string $exceptionsDir;
-
     private string $interfacesDir;
 
     private string $helpersDir;
+
+    private string $componentsDir;
 
     private string $eventsDir;
 
@@ -24,35 +24,27 @@ class ThemeInitializer
 
     public function mountThemePath(string $path) {
         $this->themePath     = $path;
-        $this->strawberryDir = $path.'/strawberry';
-        $this->factoryDir    = $path.'/strawberry/factories';
-        $this->exceptionsDir = $path.'/strawberry/factories/exceptions';
-        $this->helpersDir    = $path.'/strawberry/helpers';
-        $this->servicesDir   = $path.'/strawberry/services';
-        $this->eventsDir     = $path.'/strawberry/services/events';
-        $this->interfacesDir = $path.'/strawberry/interfaces';
-        mkdir($this->strawberryDir);
-        mkdir($this->factoryDir);
-        mkdir($this->exceptionsDir);
-        mkdir($this->helpersDir);
-        mkdir($this->servicesDir);
-        mkdir($this->eventsDir);
-        mkdir($this->interfacesDir);
-        return $this;
-    }
-
-    public function dumpAppTypeDefs(string $templatePath){
-        $content = file_get_contents($templatePath);
-        file_put_contents($this->strawberryDir.'/app.ts',$content);
+        $this->strawberryDir = $path.'/';
+        $this->factoryDir    = $path.'/factories';
+        $this->helpersDir    = $path.'/helpers';
+        $this->servicesDir   = $path.'/services';
+        $this->eventsDir     = $path.'/services/events';
+        $this->interfacesDir = $path.'/interfaces';
+        $this->componentsDir = $path.'/components';
+        if (!is_dir($this->factoryDir)) mkdir($this->factoryDir);
+        if (!is_dir($this->helpersDir))mkdir($this->helpersDir);
+        if (!is_dir($this->servicesDir))mkdir($this->servicesDir);
+        if (!is_dir($this->eventsDir))mkdir($this->eventsDir);
+        if (!is_dir($this->interfacesDir))mkdir($this->interfacesDir);
+        if (!is_dir($this->componentsDir))mkdir($this->componentsDir);
         return $this;
     }
 
     public function setBuiltInFactories (string $templatePath){
         $factories = [
-            'exceptions/FatalException.ts',
-            'exceptions/InvalidArgumentException.ts',
             'AppConfig.ts',
-            'AppEnvironment.ts'
+            'AppEnvironment.ts',
+            'BinaryState.ts'
         ];
         foreach ($factories as $factory) {
             $content = file_get_contents($templatePath.'/'.$factory);
@@ -76,12 +68,8 @@ class ThemeInitializer
 
     public function setBuiltInServices(string $templatePath){
         $services = [
-            'events/PageActivationEvent.ts',
-            'events/PageErrorEvent.ts',
-            'events/ToastErrorEvent.ts',
-            'events/ToastInfoEvent.ts',
-            'events/ToastSuccessEvent.ts',
-            'events/ToastWarningEvent.ts',
+            'events/PageActivationManager.ts',
+            'events/PageErrorManager.ts',
             'EventManager.ts'
         ];
         foreach ($services as $service) {
@@ -106,13 +94,25 @@ class ThemeInitializer
         return $this;
     }
 
-    public function setBuiltInTemplates(string $templatePath){
-        $templates = ['template.index.php','template.index.ts'];
-        foreach ($templates as $template) {
-            $content = file_get_contents($templatePath.'/templates/'.$template);
-            file_put_contents($this->themePath.'/templates/'.$template,$content);
+    public function setBuiltInComponents(string $sourcedir){
+        $components = [
+            'AppRouter' => '/AppRouter/AppRouter'
+        ];
+        $exportables = [
+            '.php',
+            '.ts',
+            '.css'
+        ];
+        foreach ($components as $component => $relpath) {
+            $compdirpath = $this->componentsDir . '/' . $component;
+            if (!is_dir($compdirpath)) mkdir($compdirpath);
+            foreach ($exportables as $exportable) {
+                $sourcepath = $sourcedir . $relpath . $exportable;
+                $destnpath  = $this->componentsDir . $relpath . $exportable;
+                $content = file_get_contents($sourcepath);
+                file_put_contents($destnpath, $content);
+            }
         }
-        return $this;
     }
 
 

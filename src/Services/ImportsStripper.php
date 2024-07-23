@@ -1,14 +1,26 @@
 <?php
 
 namespace Kenjiefx\StrawberryScratch\Services;
+use Kenjiefx\StrawberryScratch\StrawberryConfig;
 
 class ImportsStripper {
 
-    public function stripOff(string $scriptContent){
+    public function __construct(
+        private StrawberryConfig $StrawberryConfig
+    ){
+
+    }
+
+    public function stripOff(
+        string $script
+    ){
+        if (!$this->StrawberryConfig::stripImports()) 
+            return $script;
+
         $processJs = '';
         $removables = [];
-        $scriptLines = explode("\n",$scriptContent);
-        foreach ($scriptLines as $line) {
+        $lines = explode("\n", $script);
+        foreach ($lines as $line) {
             if (str_contains($line,'import')) {
                 $chars = str_split($line);
                 $isImport = false;
@@ -48,9 +60,9 @@ class ImportsStripper {
             }
         }
         foreach ($removables as $removable) {
-            $scriptContent = str_replace($removable,'',$scriptContent);
+            $script = str_replace($removable,'',$script);
         }
-        return $scriptContent;
+        return $script;
     }
 
 }

@@ -2,6 +2,7 @@
 
 namespace Kenjiefx\StrawberryScratch\Services;
 use Kenjiefx\StrawberryScratch\Registry\TokenRegistry;
+use Kenjiefx\StrawberryScratch\StrawberryConfig;
 
 /**
  * Mangling, in the context this build process, refers to the process of 
@@ -33,6 +34,9 @@ class ManglerService {
     }
 
     public static function mangle(string $source_code): string {
+
+        /** Do not mangle if we're told not to  */
+        if (!StrawberryConfig::mangle()) return $source_code;
 
         $tokens = [];
 

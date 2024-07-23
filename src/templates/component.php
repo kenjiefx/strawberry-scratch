@@ -3,7 +3,7 @@
 # Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry::register('ExampleComponent');
 ?>
 
-<template xcomponent="@COMPONENT_NAME">
+<template plunc-name="COMPONENT_NAME">
     <div xif="state=='loading'"></div>
     <div xif="state=='active'"></div>
     <div xif="state=='error'"></div>

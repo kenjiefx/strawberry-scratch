@@ -21,7 +21,7 @@ const fa=(fn)=>{
 }
 
 const registry = {}
-const strawberry = {
+const plunc = {
     create:(name)=>{
         return {
             factory:(name,callback)=>{

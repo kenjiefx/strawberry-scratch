@@ -1,2 +1,2 @@
 # strawberry-scratch
-StrawberryJS Extension for the Scratch PHP Site Generator
+plunc.js extension for the Scratch PHP Site Generator

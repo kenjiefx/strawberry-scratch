@@ -10,7 +10,10 @@
     "extensions": {
         "Kenjiefx\\StrawberryScratch\\StrawberryJS":{
             "obfuscate": true,
-            "stripImports" : true
+            "stripImports" : true,
+            "mangle": true,
+            "minify": true,
+            "compress": true
         }
     }
 }

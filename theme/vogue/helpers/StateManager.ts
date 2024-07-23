@@ -64,7 +64,7 @@ app.helper<StateManager>('StateManager',(
                     if (name in this.__callbacks) {
                         await this.__callbacks[name]()
                     }
-                    resolve()
+                    resolve(null)
                 } catch (error) {
                     reject(error)
                 }

@@ -3,7 +3,7 @@
 # Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry::register('ExampleComponent');
 ?>
 
-<template xcomponent="@AppRouter">
+<template plunc-name="AppRouter">
     <div xif="state=='loading'">
         <!-- Apply your Loading animation here -->
     </div>
