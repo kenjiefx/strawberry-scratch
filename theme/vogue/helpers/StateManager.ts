@@ -1,5 +1,5 @@
-import { PatchHelper, ScopeObject, app } from "../app";
-import { FatalException } from "../factories/exceptions/FatalException";
+import { PatchAPI, ScopeObject, app } from "../interfaces/app"
+
 
 /**
  * Manages states in your component
@@ -12,13 +12,13 @@ export interface StateManager {
      * @param name - The name of the state 
      * @param callback - @see StateActivationCallback
      */
-    __register:(name:StateNames,callback:StateActivationCallback)=>this
+    __register:(name: StateNames, callback: StateActivationCallback)=>this
 
     /**
      * Switch to a specific state
      * @param name - The name of the state
      */
-    __switch:(name:StateNames)=>Promise<void>
+    __switch:(name: StateNames)=>Promise<void>
 
     /**
      * Returns the current state value
@@ -29,35 +29,34 @@ export interface StateManager {
 
 app.helper<StateManager>('StateManager',(
     $scope: ScopeObject<StateInstance>,
-    $patch: PatchHelper,
-    FatalException: FatalException
+    $patch: PatchAPI
 )=>{
     class __ManagerHelper implements StateManager {
         private __callbacks:StateCallbackMap = {}
         private __scope: StateInstance
-        private __patch: PatchHelper
+        private __patch: PatchAPI
         private __blockName: string | null
         constructor(){
             this.__blockName = null
         }
-        __setScope(scope:ScopeObject<StateInstance>){
+        __setScope(scope: ScopeObject<StateInstance>){
             this.__scope = scope
         }
-        __setPatch(patch:PatchHelper) {
+        __setPatch(patch: PatchAPI) {
             this.__patch = patch
         }
-        __setBlockName(blockName:string) {
+        __setBlockName(blockName: string) {
             this.__blockName = blockName
         }
-        __register(name:StateNames,callback:StateActivationCallback){
+        __register(name: StateNames, callback: StateActivationCallback){
             if (name in this.__callbacks) {
-                new FatalException(`Duplicate callback for component state "${name}"`)
+                console.error(`Duplicate callback for component state "${name}"`)
                 return this
             }
             this.__callbacks[name] = callback
             return this
         }
-        __switch(name:StateNames):Promise<void>{
+        __switch(name: StateNames): Promise<void>{
             return new Promise (async (resolve,reject)=>{
                 try {
                     this.__scope.state = name

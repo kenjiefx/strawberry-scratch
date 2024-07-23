@@ -1,6 +1,4 @@
-import { BlockElement, PatchHelper, ScopeObject, app } from "../app";
-import { FatalException } from "../factories/exceptions/FatalException";
-import { InvalidArgumentException } from "../factories/exceptions/InvalidArgumentException";
+import { BlockAPI, PatchAPI, ScopeObject, app } from "../interfaces/app";
 import { EventManagerInterface } from "../services/EventManager";
 
 export interface ModalManager {
@@ -26,17 +24,15 @@ export interface ModalManager {
 
 app.helper<ModalManager>('ModalManager',(
     $scope: ScopeObject<StateInstance>,
-    $patch: PatchHelper,
-    $block: BlockElement,
-    FatalException: FatalException,
-    InvalidArgumentException: InvalidArgumentException,
+    $patch: PatchAPI,
+    $block: BlockAPI,
     EventManager: EventManagerInterface
 )=>{
     let ManagerInstanceId = 0
     const modalmanager = 'ModalManager'
     function assertDialogElement (namespace:string, element:unknown): asserts element is HTMLDialogElement {
         if (!(element instanceof HTMLDialogElement)) {
-            throw new InvalidArgumentException(`Block element ${namespace} must be instanceof HTMLDialogElement`)
+            throw new Error(`Block element ${namespace} must be instanceof HTMLDialogElement`)
         }
     }
     const makeEventUniqueId = <TName extends string>(namespace:ModalNamespace<TName>,type:'open'|'close') => {
@@ -45,7 +41,7 @@ app.helper<ModalManager>('ModalManager',(
     }
     class __ManagerHelper implements ModalManager {
         private __scope: StateInstance
-        private __patch: PatchHelper
+        private __patch: PatchAPI
         private __namespace: string
         private __name: string
         private __eventName: {
@@ -98,7 +94,7 @@ app.helper<ModalManager>('ModalManager',(
             manager.__patch = $patch
             const tokens = modalname.split('/')
             if (tokens[0]!==''||tokens[1]!==modalmanager||tokens[2].length===0||tokens[3]!=='') {
-                new FatalException(`Invalid modal namespace structure "${modalname}"`)
+                console.error(`Invalid modal namespace structure "${modalname}"`)
                 return manager
             }
             manager.__name = tokens[2]
@@ -106,7 +102,7 @@ app.helper<ModalManager>('ModalManager',(
                 manager.__scope[modalmanager] = {}
             }
             if (manager.__name in manager.__scope[modalmanager]) {
-                new FatalException(`Duplicate modal registration "${modalname}"`)
+                console.error(`Duplicate modal registration "${modalname}"`)
                 return manager
             }
             manager.__scope[modalmanager][manager.__name] = {

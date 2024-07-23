@@ -1,5 +1,4 @@
-import { app } from "../app";
-import { GlobalWindowObject } from "../interfaces/window";
+import { app } from "../interfaces/app"
 
 export interface AppEnvironmentInterface {
     getDeploymentName:()=>'production' | 'default'

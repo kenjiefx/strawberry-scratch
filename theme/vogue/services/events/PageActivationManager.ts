@@ -1,39 +1,32 @@
-import { app } from "../../app";
+import { app } from "../../interfaces/app";
 import { EventManagerInterface } from "../EventManager";
 
 /**
  * Interface for subscribing to and dispatching page activation events.
  */
-export interface PageErrorEvent {
+export interface PageActivationManager {
     /**
      * Subscribe to the page activation event.
      * @param callback - The callback function to be called when the page is activated.
      */
     __subscribe:(callback:()=>void)=>void 
-
-    __hasRenderClearance:()=>boolean
-
     /**
      * Dispatch the page activation event.
      */
     __dispatch:()=>void
 }
 
-app.service<PageErrorEvent>('PageErrorEvent',(
+app.service<PageActivationManager>('PageActivationManager',(
     EventManager: EventManagerInterface
 )=>{
-    const PageErrorEventName = 'PEE'
-    EventManager.__register(PageErrorEventName)
-    let renderingCleared = true
+    const PageActivationEventName = 'PAE'
+    EventManager.__register(PageActivationEventName)
     return {
         __subscribe:(callback)=>{
-            EventManager.__subscribe(PageErrorEventName,callback)
+            EventManager.__subscribe(PageActivationEventName,callback)
         },
         __dispatch:()=>{
-            renderingCleared = false
-        },
-        __hasRenderClearance:()=>{
-            return renderingCleared
+            EventManager.__dispatch(PageActivationEventName)
         }
     }
 })
