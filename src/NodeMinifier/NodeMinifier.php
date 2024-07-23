@@ -1,6 +1,7 @@
 <?php
 
 namespace Kenjiefx\StrawberryScratch\NodeMinifier;
+use Kenjiefx\StrawberryScratch\StrawberryConfig;
 
 class NodeMinifier {
 
@@ -8,15 +9,20 @@ class NodeMinifier {
 
     private array $originalTree = [];
 
-    public function __construct(){
+    public function __construct(
+        private StrawberryConfig $StrawberryConfig
+    ){
 
     }
 
-    public function setCodeBlock(string $codeBlock){
+    public function minify(string $codeBlock){
+        # Do not minify if we're not allowed to
+        if (!$this->StrawberryConfig::minify()) return $codeBlock;
         $this->codeBlock = $codeBlock;
+        return $this->start();
     }
 
-    public function minify(){
+    public function start(){
         $sourceCode = file_get_contents(__dir__.'/Helper.js').$this->codeBlock.'console.log(JSON.stringify(registry));';
         $sourcePath = __dir__.'/src.js';
         $minifiedPath = __dir__.'/min.js';
@@ -38,13 +44,14 @@ class NodeMinifier {
     private static function minifySourceCode(string $sourcePath,string $outputPath){
         $exitCode = 0;
         $output   = [];
-        exec('minify '.$sourcePath,$output,$exitCode);
+        exec('minify '.$sourcePath.'',$output,$exitCode);
         $minified = implode('',$output);
         file_put_contents($outputPath,$minified);
     }
 
     private function reconstruct(array $original,array $minified){
-        $script = 'const app = strawberry.create("app"); ';
+
+        $script = 'const app = plunc.create("app"); ';
         foreach ($original as $name => $data) {
             $arguments = '('.implode(',',$data['arguments']).')';
             $methodScript = "app.".$data["type"]."('".$name."',".$arguments."=>{";
