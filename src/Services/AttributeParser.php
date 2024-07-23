@@ -2,56 +2,58 @@
 
 namespace Kenjiefx\StrawberryScratch\Services;
 
+/**
+ * Helps with parsing attributes in an HTML string
+ */
 class AttributeParser
 {
-    private string $htmlSource; 
+    private string $html; 
     private array $htmlChars; 
     private string $indicator;
 
-    public function setHtmlSource(
-        string $htmlSource
-    ){
-        $this->htmlSource = $htmlSource;
-        $this->htmlChars = str_split($htmlSource);
-        return $this;
-    }
+    /**
+     * Returns all values given to an attributes found in an HTML string
+     * @param string $html
+     * @param string $attribute
+     * @return array
+     */
+    public static function values(
+        string $html,
+        string $attribute
+    ): array {
+        $indicator = \sprintf(' %s="', $attribute);
+        $chars = \str_split($html);
+        $accumalator = [];
+        $ichars = \str_split($indicator);
+        $ipointer = 0;
+        $recording = false;
+        $value = '';
 
-    public function setIndicator(
-        string $indicator
-    ){
-        $this->indicator = $indicator;
-        return $this;
-    }
-
-    public function getValues(){
-        $attributeValues      = [];
-        $indicatorChars       = str_split($this->indicator);
-        $indicatorCharPointer = 0;
-        $isRecording          = false;
-        $attributeValue       = '';
-        foreach ($this->htmlChars as $htmlChar) {
-            if ($isRecording && $htmlChar!=='"') {
-                $attributeValue = $attributeValue.$htmlChar;
+        foreach ($chars as $char) {
+            if ($recording && $char !== '"') {
+                $value = $value.$char;
                 continue;
             }
-            if ($isRecording && $htmlChar==='"') {
-                if (!in_array($attributeValue,$attributeValues)) {
-                    array_push($attributeValues,$attributeValue);
+            if ($recording && $char==='"') {
+                if (!\in_array($value, $accumalator)) {
+                    \array_push($accumalator, $value);
                 }
-                $attributeValue = '';
-                $isRecording = false;
-                $indicatorCharPointer = 0;
+                $value = '';
+                $recording = false;
+                $ipointer = 0;
                 continue;
             }
-            if ($htmlChar===$indicatorChars[$indicatorCharPointer]) {
-                $indicatorCharPointer++;
+            if ($char === $ichars[$ipointer]) {
+                $ipointer++;
             } else {
-                $indicatorCharPointer = 0;
+                $ipointer = 0;
             }
-            if ($indicatorCharPointer===count($indicatorChars)) {
-                $isRecording = true;
+            if ($ipointer === count($ichars)) {
+                $recording = true;
             }
         }
-        return $attributeValues;
+
+        return $accumalator;
+
     }
 }
