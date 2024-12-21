@@ -1,5 +1,6 @@
 /vendor/
 /dist/
+/plunc/
 /node_modules/
 /theme/vogue/components/
 !/theme/vogue/components/Router

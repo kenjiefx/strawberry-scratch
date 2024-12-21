@@ -4,7 +4,7 @@
       "target": "es2017",
       "experimentalDecorators": true,
       "emitDecoratorMetadata":true,
-      "outDir": "./theme",
+      "outDir": "./plunc",
       "rootDir":"./theme"
     },
     "exclude": ["node_modules"],
