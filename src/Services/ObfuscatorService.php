@@ -56,6 +56,10 @@ class ObfuscatorService
         $compattr = $this->AttributeRegistry->component();  
 
         foreach ($components as $fullname => $minified) {
+            if (str_contains($fullname, '/')){
+                $tokens = explode('/', $fullname);
+                $fullname = $tokens[count($tokens) - 1];
+            }
             $html = \str_replace(
                 \sprintf('%s="%s"', $nameattr, $fullname),
                 \sprintf('%s="%s"', $nameattr, $minified),
@@ -86,6 +90,10 @@ class ObfuscatorService
 
         foreach ($registries as $key => $items) {
             foreach ($items as $fullname => $minfdname) {
+                if (str_contains($fullname, '/')){
+                    $tokens = explode('/', $fullname);
+                    $fullname = $tokens[count($tokens) - 1];
+                }
                 $script = \str_replace(
                     \sprintf('app.%s(\'%s',$key,$fullname),
                     \sprintf('app.%s(\'%s',$key,$minfdname),

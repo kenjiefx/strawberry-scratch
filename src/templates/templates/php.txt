@@ -1,0 +1,6 @@
+<?php 
+    # 
+    # Register all the components being used in this file here.
+    #
+    # Kenjiefx\StrawberryScratch\Components::register('COMPONENT_NAME'); 
+?>

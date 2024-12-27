@@ -1,20 +1,29 @@
 <?php
 
 namespace Kenjiefx\StrawberryScratch;
+use Kenjiefx\ScratchPHP\App\Build\BuildEventDTO;
+use Kenjiefx\ScratchPHP\App\Build\CollectComponentAssetEventDTO;
 use Kenjiefx\ScratchPHP\App\Components\ComponentController;
+use Kenjiefx\ScratchPHP\App\Components\ComponentEventDTO;
 use Kenjiefx\ScratchPHP\App\Events\ListensTo;
 use Kenjiefx\ScratchPHP\App\Events\OnBuildHtmlEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnBuildJsEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnBuildCompleteEvent;
+use Kenjiefx\ScratchPHP\App\Events\OnCollectComponentJsEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnSettingsRegistryEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateComponentHtmlEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateComponentJsEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateTemplateEvent;
 use Kenjiefx\ScratchPHP\App\Events\OnCreateThemeEvent;
+use Kenjiefx\ScratchPHP\App\Extensions\RegisterCommand;
 use Kenjiefx\ScratchPHP\App\Interfaces\ExtensionsInterface;
 use Kenjiefx\ScratchPHP\App\Templates\TemplateController;
+use Kenjiefx\ScratchPHP\App\Templates\TemplateEventDTO;
 use Kenjiefx\ScratchPHP\App\Themes\ThemeController;
-use Kenjiefx\StrawberryScratch\NodeMinifier\NodeMinifier;
+use Kenjiefx\StrawberryScratch\Framework\AppService;
+use Kenjiefx\StrawberryScratch\Framework\AppServiceFramework;
+use Kenjiefx\StrawberryScratch\Commands\SyncPages;
+use Kenjiefx\StrawberryScratch\NodeMinifier\TerserMinifier;
 use Kenjiefx\StrawberryScratch\Registry\FactoriesRegistry;
 use Kenjiefx\StrawberryScratch\Registry\GlobalFnsRegistry;
 use Kenjiefx\StrawberryScratch\Registry\HelpersRegistry;
@@ -24,8 +33,11 @@ use Kenjiefx\StrawberryScratch\Services\JSCompressor;
 use Kenjiefx\StrawberryScratch\Services\ManglerService;
 use Kenjiefx\StrawberryScratch\Services\ObfuscatorService;
 use Kenjiefx\StrawberryScratch\Registry\ComponentsRegistry;
+use Kenjiefx\StrawberryScratch\Services\PageSyncService;
 use Kenjiefx\StrawberryScratch\Services\ThemeInitializer;
+use Kenjiefx\StrawberryScratch\Services\DependencyImporter;
 
+#[RegisterCommand(SyncPages::class)]
 class StrawberryJS implements ExtensionsInterface
 {
 
@@ -38,19 +50,21 @@ class StrawberryJS implements ExtensionsInterface
         private ObfuscatorService $ObfuscatorService,
         private GlobalFnsRegistry $GlobalFunctionsRegistry,
         private ImportsStripper $ImportsStripper,
+        private AppServiceFramework $AppServiceFramework,
         private FactoriesRegistry $FactoriesRegistry,
         private ServicesRegistry $ServicesRegistry,
         private HelpersRegistry $helpersRegistry,
         private JSCompressor $JSCompressor,
-        private NodeMinifier $NodeMinifier,
+        private TerserMinifier $NodeMinifier,
         private ThemeInitializer $ThemeInitializer
     ){
-
+        PageSyncService::sync(ROOT . '/pages');
     }
 
     #[ListensTo(OnBuildHtmlEvent::class)]
-    public function HTMLProcessor(string $html):string {
-        return $this->ObfuscatorService->html($html);
+    public function HTMLProcessor(BuildEventDTO $BuildEventDTO): void {
+        $html = $this->ObfuscatorService->html($BuildEventDTO->content);
+        $BuildEventDTO->content = $html;
     }
 
     #[ListensTo(OnSettingsRegistryEvent::class)]
@@ -59,13 +73,19 @@ class StrawberryJS implements ExtensionsInterface
     }
 
     #[ListensTo(OnBuildJsEvent::class)]
-    public function JavascriptProcessor(string $script):string {
+    public function JavascriptProcessor(BuildEventDTO $BuildEventDTO): void {
+
+        DependencyImporter::clear();
+
+        $script = $BuildEventDTO->content;
 
         # Registrations of global functions and auxiliary scripts
         $this->GlobalFunctionsRegistry->register();
         $this->FactoriesRegistry->register();
-        $this->ServicesRegistry->registry();
+        $this->ServicesRegistry->register();
         $this->helpersRegistry->register();
+
+        $script .= $this->AppServiceFramework->import($BuildEventDTO);
         
         # Compilations based on script usage
         $compiled = $this->GlobalFunctionsRegistry->prepend()
@@ -91,41 +111,134 @@ class StrawberryJS implements ExtensionsInterface
 
         $this->ComponentsRegistry::clear();
 
-        return $compiled;
+        $BuildEventDTO->content = $compiled;
+    }
+
+    #[ListensTo(OnCreateTemplateEvent::class)]
+    public function CreateTemplateListener(TemplateEventDTO $TemplateEventDTO): void{
+        $templname = $TemplateEventDTO->TemplateController->TemplateModel->name;
+        $phpath = $TemplateEventDTO->TemplateController->getpath();
+        $tspath = str_replace(
+            '.php',
+            '.ts',
+            $phpath
+        );
+        $templdir = dirname($tspath);
+        if (!is_dir($templdir)) {
+            throw new \Exception('StrawberryScratch: Unable to create typescript file for new template. ' .
+                'Please make sure that the directory exists within the template directory: "' .
+                $templdir.'"');
+        }
+
+        # Resolving relative path
+        $pathnames = explode('/',$templname);
+        $converted = array_map(
+            function($pathnames) { return '..'; },
+            $pathnames
+        );
+        $relpath = implode('/', $converted);
+
+        # Get TS content 
+        $templts = file_get_contents(
+            __dir__ . '/templates/templates/ts.txt'
+        );
+        file_put_contents(
+            $tspath,
+            str_replace(
+                '==RELATIVE_PATH==',
+                $relpath,
+                $templts
+                )
+        );
+
+        # Get PHP content
+        $template_php 
+            = file_get_contents(
+                filename: __dir__ . '/templates/templates/php.txt'
+            );
+        $TemplateEventDTO->content = $template_php;
+    }
+
+    #[ListensTo(OnCollectComponentJsEvent::class)]
+    public function CollectJSEvent(CollectComponentAssetEventDTO $CollectEventDTO){
+        $ThemeController = new ThemeController();
+        $name = $CollectEventDTO->ComponentController->ComponentModel->name;
+        if (str_contains($name, '/')){
+            $tokens = explode('/', $name);
+            $name = $tokens[count($tokens) - 1];
+        }
+        $jspath =
+            ROOT
+            . '/dist/'
+            . $ThemeController->theme()->name 
+            . str_replace(
+                $ThemeController->getdir(),
+                '',
+                $CollectEventDTO->ComponentController->getdir()
+            ) 
+            . $name
+            . '.js';
+        if (!file_exists($jspath)) {
+            throw new \InvalidArgumentException(
+                'StrawberryScratch: Component JS not found in this path "' . $jspath . '"'
+            );
+        }
+        $CollectEventDTO->content = file_get_contents($jspath);
     }
 
     #[ListensTo(OnCreateComponentHtmlEvent::class)]
-    public function onCreateComponentContent(ComponentController $ComponentController){
-        $name         = $ComponentController->getComponent()->getName();
-        $html         = $ComponentController->getComponent()->getHtml();
-        $template     = file_get_contents(__dir__ . '/templates/component.php');
-        $ComponentController->getComponent()->setHtml(
-            str_replace('COMPONENT_NAME', $name, $template)
+    public function onCreateComponentContent(ComponentEventDTO $ComponentEventDTO){
+        $name = $ComponentEventDTO->ComponentController->ComponentModel->name;
+        $namespace = $name;
+        
+        if (str_contains($name, '/')){
+            $tokens = explode('/', $name);
+            $name = $tokens[count($tokens) - 1];
+        }
+
+        $template = file_get_contents(__dir__ . '/templates/components/php.txt');
+        $template =  str_replace(
+            '==COMPONENT_NAME==', 
+            $name, 
+            $template
         );
-        return null;
+
+        $ComponentEventDTO->content = $template;
     }
 
     #[ListensTo(OnCreateComponentJsEvent::class)]
-    public function onCreateComponentJS(ComponentController $ComponentController) {
-        $name          = $ComponentController->getComponent()->getName();
-        $javascript    = $ComponentController->getComponent()->getJavascript();
-        $template      = file_get_contents(__dir__ . '/templates/component.ts');
-        $ComponentController->getComponent()->setJavascript(
-            str_replace('COMPONENT_NAME', $name, $template)
-        );
-    }
+    public function onCreateComponentJS(ComponentEventDTO $ComponentEventDTO) {
+        $name = $ComponentEventDTO->ComponentController->ComponentModel->name;
+        $namespace = $name;
+        
+        if (str_contains($name, '/')){
+            $tokens = explode('/', $name);
+            $name = $tokens[count($tokens) - 1];
+        }
 
-    #[ListensTo(OnCreateThemeEvent::class)]
-    public function onCreateTheme(ThemeController $ThemeController){
-        $themePath = $ThemeController->getThemeDirPath();
-        $this->ThemeInitializer
-            ->mountThemePath($themePath)
-            ->setBuiltInFactories(__dir__.'/templates/factories')
-            ->setBuiltInServices(__dir__.'/templates/services')
-            ->setBuiltInHelpers(__dir__.'/templates/helpers')
-            ->setBuiltInInterfaces(__dir__.'/templates/interfaces')
-            ->setThemeIndex(__dir__.'/templates/index.php')
-            ->setBuiltInComponents(__dir__.'/templates/components');
+        $template = file_get_contents(__dir__ . '/templates/components/ts.txt');
+        $template =  str_replace(
+            '==COMPONENT_NAME==', 
+            $name, 
+            $template
+        );
+
+        # Resolving relative path
+        $pathnames = explode('/',$namespace);
+        $converted = array_map(
+            function($pathnames) { return '..'; },
+            $pathnames
+        );
+        $relpath = implode('/', $converted);
+
+        $template =  str_replace(
+            '==RELATIVE_PATH==', 
+            $relpath, 
+            $template
+        );
+
+        $ComponentEventDTO->content = $template;
+
     }
     
     #[ListensTo(OnBuildCompleteEvent::class)]

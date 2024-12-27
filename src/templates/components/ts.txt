@@ -1,0 +1,49 @@
+import { StateManager } from "==RELATIVE_PATH==/../helpers/StateManager";
+import { PatchAPI, ScopeObject, app } from "==RELATIVE_PATH==/../interfaces/app";
+import { ActivationEvent } from "==RELATIVE_PATH==/../services/events/ActivationEvent";
+
+/**
+ * Scoped data stored within the component.
+ */
+type ComponentScope = {
+    /**
+     * These are the different states of `==COMPONENT_NAME==` component. These states
+     * are fed into the component's StateManager.
+     */
+    state: 'active' | 'error' | 'loading' | 'empty'
+}
+
+/** 
+ * Expose methods that parents of `==COMPONENT_NAME==` component 
+ * can make use of. These methods always return Promise.
+ */
+export type ==COMPONENT_NAME== = {
+    /**
+     * Allows parent component to explicitly render the 
+     * `==COMPONENT_NAME==` component.
+     */
+    render: () => Promise<void>
+}
+
+app.component<==COMPONENT_NAME==>('==COMPONENT_NAME==', (
+    $scope: ScopeObject<ComponentScope>,
+    $patch: PatchAPI,
+    StateManager: StateManager,
+    ActivationEvent: ActivationEvent
+)=>{
+
+    /** 
+     * You can self-activate this component by subscribing to the `ActivationEvent`. 
+     * This event is fired after the @AppRouter component signals the page activation.
+     */
+    ActivationEvent.subscribe(async ()=>{
+        await StateManager.switch('active')
+    })
+
+    return {
+        render: async () => {
+            $scope.state = 'active'
+            await $patch()
+        }
+    }
+})
