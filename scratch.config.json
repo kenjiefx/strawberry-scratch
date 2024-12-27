@@ -9,11 +9,11 @@
     },
     "extensions": {
         "Kenjiefx\\StrawberryScratch\\StrawberryJS":{
-            "obfuscate": true,
+            "obfuscate": false,
             "stripImports" : true,
-            "mangle": true,
-            "minify": true,
-            "compress": true
+            "mangle": false,
+            "minify": false,
+            "compress": false
         }
     }
 }

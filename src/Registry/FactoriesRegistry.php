@@ -36,9 +36,10 @@ class FactoriesRegistry
     public function compile(
         string $script
     ){
-        return $this->UsageBasedCompiler->run(
+        $result = $this->UsageBasedCompiler->run(
             static::$factories, $script
         );
+        return $result;
     }
 
     public function getFactories(){

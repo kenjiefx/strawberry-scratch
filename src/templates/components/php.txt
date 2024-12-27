@@ -1,0 +1,18 @@
+<?php 
+    # 
+    # Register all the components being used in this file here.
+    #
+    # Kenjiefx\StrawberryScratch\Components::register('COMPONENT_NAME'); 
+?>
+
+<template plunc-name="==COMPONENT_NAME==">
+    <div plunc-if="state == 'loading'" class="width-24">
+        <!-- Show something when this component is being loaded -->
+    </div>
+    <div plunc-if="state == 'active'" class="width-24">
+        
+    </div>
+    <div plunc-if="state == 'error'" class="width-24">
+        <!-- Show something when this component fails to render -->
+    </div>
+</template>

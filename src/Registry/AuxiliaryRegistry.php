@@ -54,7 +54,7 @@ class AuxiliaryRegistry
         string $namespace
     ){
         $accumulator = [];
-        $dir = $this->ThemeController->getThemeDirPath() . $namespace;
+        $dir = ROOT . '/dist/' . $this->ThemeController->theme()->name  . $namespace;
         if (!\is_dir($dir)) return [];
         $this->process($namespace, $dir, $accumulator);
         return $accumulator;

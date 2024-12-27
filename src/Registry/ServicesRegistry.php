@@ -18,11 +18,12 @@ class ServicesRegistry
         private DependencyParser $dependencyParser,
         private UsageBasedCompiler $UsageBasedCompiler
     ){
-
+        
     }
 
-    public function registry(){
+    public function register(){
         if (count(static::$services) > 0) return;
+        static::$services['AppService'] = TokenRegistry::register('AppService');
         foreach ($this->AuxiliaryRegistry->collect('/services') as $service) {
             static::$services[$service] = TokenRegistry::register($service);
         }
@@ -36,9 +37,10 @@ class ServicesRegistry
     public function compile(
         string $script
     ){
-        return $this->UsageBasedCompiler->run(
+        $result = $this->UsageBasedCompiler->run(
             static::$services, $script
         );
+        return $result;
     }
 
     public function getServices(){

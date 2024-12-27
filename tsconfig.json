@@ -1,10 +1,10 @@
 {
     "compilerOptions": {
-      "skipLibCheck": true, /* Skip type checking all .d.ts files. */
-      "target": "es2017",
+      "skipLibCheck": true,
+      "target": "ES2021",
       "experimentalDecorators": true,
       "emitDecoratorMetadata":true,
-      "outDir": "./theme",
+      "outDir": "./plunc",
       "rootDir":"./theme"
     },
     "exclude": ["node_modules"],
