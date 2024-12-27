@@ -1,28 +1,27 @@
 import { app } from "../interfaces/app";
 
-export interface BinaryStateInterface {
-    true:()=>boolean
-    false:()=>boolean
-    set:(state:boolean)=>void
+type StateInterface = {
+  true: () => boolean
+  false: () => boolean
+  set: (state: boolean) => void
 }
-
-export type BinaryState = new (...args: any[]) => BinaryStateInterface
+export type BinaryState = new (...args: any[]) => StateInterface
 
 app.factory('BinaryState', () => {
-    class __BINObject implements BinaryStateInterface {
-        private __state: '1' | '0'
-        constructor(state: boolean){
-            this.__state = state ? '1' : '0'
-        }
-        set(state: boolean){
-            this.__state = state ? '1' : '0'
-        }
-        true(){
-            return this.__state === '1'
-        }
-        false(){
-            return this.__state === '0'
-        }
+  class Factory implements StateInterface {
+    private state: '1' | '0'
+    constructor(state: boolean){
+      this.state = state ? '1' : '0'
     }
-    return __BINObject
+    set(state: boolean){
+      this.state = state ? '1' : '0'
+    }
+    true(){
+      return this.state === '1'
+    }
+    false(){
+      return this.state === '0'
+    }
+  }
+  return Factory
 })
